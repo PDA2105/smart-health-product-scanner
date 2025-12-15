@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "303648474574",
+    "project_id": "smart-health-product-sca-a1389",
+    "storage_bucket": "smart-health-product-sca-a1389.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:303648474574:android:2a4886e15520665329579f",
+        "android_client_info": {
+          "package_name": "com.example.smart_health_product_scanner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANdWtEQ9Q4UW_l60LWZGWSMDYoUGm_Z0U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
