@@ -57,32 +57,156 @@ Phân loại:
 
 ## 5. Cấu trúc thư mục Flutter chuẩn {#cấu-trúc-thư-mục-flutter-chuẩn}
 
-lib/  
-├── main.dart  
-├── app.dart  
-├── core/  
-│ ├── constants/  
-│ ├── theme/  
-│ ├── utils/  
-│ └── services/  
-├── data/  
-│ ├── models/  
-│ ├── repositories/  
-│ └── datasources/  
-├── features/  
-│ ├── auth/  
-│ ├── profile/  
-│ ├── scan/  
-│ ├── product/  
-│ ├── ai_analysis/  
-│ ├── recommendation/  
-│ ├── wishlist/  
-│ └── history/  
-├── shared/  
-│ ├── widgets/  
-│ └── dialogs/  
-└── routes/  
-└── app_routes.dart
+smart_health_scanner/
+├── lib/
+│   ├── main.dart                          # Entry point
+│   ├── app.dart                           # MaterialApp config
+│   │
+│   ├── core/                              # Core functionality
+│   │   ├── constants/
+│   │   │   ├── app_constants.dart         # App-wide constants
+│   │   │   ├── api_constants.dart         # API endpoints
+│   │   │   └── storage_constants.dart     # Storage keys
+│   │   │
+│   │   ├── theme/
+│   │   │   ├── app_theme.dart             # Theme configuration
+│   │   │   ├── app_colors.dart            # Color palette
+│   │   │   └── app_text_styles.dart       # Text styles
+│   │   │
+│   │   ├── utils/
+│   │   │   ├── validators.dart            # Input validators
+│   │   │   ├── formatters.dart            # Data formatters
+│   │   │   ├── bmi_calculator.dart        # BMI calculation
+│   │   │   └── date_utils.dart            # Date utilities
+│   │   │
+│   │   └── services/
+│   │       ├── firebase_service.dart      # Firebase initialization
+│   │       ├── storage_service.dart       # Local storage
+│   │       └── navigation_service.dart    # Navigation helper
+│   │
+│   ├── data/                              # Data layer
+│   │   ├── models/
+│   │   │   ├── user_model.dart            # User data model
+│   │   │   ├── product_model.dart         # Product data model
+│   │   │   ├── health_profile_model.dart  # Health profile
+│   │   │   └── scan_history_model.dart    # Scan history
+│   │   │
+│   │   ├── repositories/
+│   │   │   ├── auth_repository.dart       # Auth operations
+│   │   │   ├── user_repository.dart       # User CRUD
+│   │   │   ├── product_repository.dart    # Product CRUD
+│   │   │   └── scan_repository.dart       # Scan operations
+│   │   │
+│   │   └── datasources/
+│   │       ├── firebase_datasource.dart   # Firebase operations
+│   │       ├── local_datasource.dart      # Local DB operations
+│   │       └── api_datasource.dart        # External API calls
+│   │
+│   ├── features/                          # Feature modules
+│   │   ├── auth/
+│   │   │   ├── screens/
+│   │   │   │   ├── login_screen.dart
+│   │   │   │   ├── register_screen.dart
+│   │   │   │   └── forgot_password_screen.dart
+│   │   │   ├── widgets/
+│   │   │   │   ├── auth_text_field.dart
+│   │   │   │   └── auth_button.dart
+│   │   │   └── providers/
+│   │   │       └── auth_provider.dart
+│   │   │
+│   │   ├── profile/
+│   │   │   ├── screens/
+│   │   │   │   ├── profile_screen.dart
+│   │   │   │   └── edit_profile_screen.dart
+│   │   │   ├── widgets/
+│   │   │   │   ├── bmi_card.dart
+│   │   │   │   └── health_stats_card.dart
+│   │   │   └── providers/
+│   │   │       └── profile_provider.dart
+│   │   │
+│   │   ├── scan/
+│   │   │   ├── screens/
+│   │   │   │   ├── scan_screen.dart
+│   │   │   │   └── image_scan_screen.dart
+│   │   │   ├── widgets/
+│   │   │   │   ├── barcode_scanner_widget.dart
+│   │   │   │   └── scan_button.dart
+│   │   │   └── providers/
+│   │   │       └── scan_provider.dart
+│   │   │
+│   │   ├── product/
+│   │   │   ├── screens/
+│   │   │   │   └── product_detail_screen.dart
+│   │   │   ├── widgets/
+│   │   │   │   ├── product_info_card.dart
+│   │   │   │   ├── nutrition_table.dart
+│   │   │   │   └── ingredient_list.dart
+│   │   │   └── providers/
+│   │   │       └── product_provider.dart
+│   │   │
+│   │   ├── ai_analysis/
+│   │   │   ├── screens/
+│   │   │   │   └── analysis_result_screen.dart
+│   │   │   ├── widgets/
+│   │   │   │   ├── health_score_widget.dart
+│   │   │   │   └── warning_card.dart
+│   │   │   └── providers/
+│   │   │       └── ai_analysis_provider.dart
+│   │   │
+│   │   ├── recommendation/
+│   │   │   ├── screens/
+│   │   │   │   └── recommendation_screen.dart
+│   │   │   ├── widgets/
+│   │   │   │   └── product_recommendation_card.dart
+│   │   │   └── providers/
+│   │   │       └── recommendation_provider.dart
+│   │   │
+│   │   ├── wishlist/
+│   │   │   ├── screens/
+│   │   │   │   └── wishlist_screen.dart
+│   │   │   ├── widgets/
+│   │   │   │   └── wishlist_item.dart
+│   │   │   └── providers/
+│   │   │       └── wishlist_provider.dart
+│   │   │
+│   │   └── history/
+│   │       ├── screens/
+│   │       │   └── history_screen.dart
+│   │       ├── widgets/
+│   │       │   └── history_item.dart
+│   │       └── providers/
+│   │           └── history_provider.dart
+│   │
+│   ├── shared/                            # Shared components
+│   │   ├── widgets/
+│   │   │   ├── custom_button.dart
+│   │   │   ├── custom_text_field.dart
+│   │   │   ├── loading_widget.dart
+│   │   │   ├── error_widget.dart
+│   │   │   └── bottom_nav_bar.dart
+│   │   │
+│   │   └── dialogs/
+│   │       ├── confirmation_dialog.dart
+│   │       └── info_dialog.dart
+│   │
+│   └── routes/
+│       ├── app_routes.dart                # Route names
+│       └── route_generator.dart           # Route configuration
+│
+├── assets/
+│   ├── images/
+│   ├── icons/
+│   └── fonts/
+│
+├── test/
+│   ├── unit/
+│   ├── widget/
+│   └── integration/
+│
+├── pubspec.yaml                           # Dependencies
+├── README.md                              # Project documentation
+├── .gitignore
+└── analysis_options.yaml                  # Lint rules
 
 ## 6. Firebase sử dụng {#firebase-sử-dụng}
 
