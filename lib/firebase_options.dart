@@ -65,4 +65,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'smart-health-product-sca-a1389.firebasestorage.app',
     iosBundleId: 'com.example.smartHealthProductScanner',
   );
+
 }
