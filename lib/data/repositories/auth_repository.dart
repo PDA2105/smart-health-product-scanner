@@ -52,5 +52,18 @@ class AuthRepository {
   }
 
   Future<void> signOut() => _remoteDataSource.signOut();
+
+  Future<void> resetPassword({required String email}) async {
+    // Kiểm tra email có tồn tại trước khi gửi
+    final emailExists = await _remoteDataSource.checkEmailExists(email: email);
+    if (!emailExists) {
+      throw Exception('Email này chưa được đăng ký trong hệ thống.');
+    }
+    return _remoteDataSource.resetPassword(email: email);
+  }
+
+  Future<bool> checkEmailExists({required String email}) {
+    return _remoteDataSource.checkEmailExists(email: email);
+  }
 }
 

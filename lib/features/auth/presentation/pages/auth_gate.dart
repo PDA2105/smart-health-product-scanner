@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
-import 'auth_page.dart';
 import 'home_page.dart';
+import 'login_page.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
@@ -22,9 +22,8 @@ class AuthGate extends StatelessWidget {
           return const HomePage();
         }
 
-        return const AuthPage();
+        return const LoginPage();
       },
     );
   }
 }
-
