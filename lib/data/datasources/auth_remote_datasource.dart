@@ -56,5 +56,19 @@ class AuthRemoteDataSource {
       _googleSignIn.signOut(),
     ]);
   }
+
+  Future<void> resetPassword({required String email}) {
+    return _firebaseAuth.sendPasswordResetEmail(email: email);
+  }
+
+  Future<bool> checkEmailExists({required String email}) async {
+    try {
+      final methods = await _firebaseAuth.fetchSignInMethodsForEmail(email);
+      return methods.isNotEmpty;
+    } catch (e) {
+      // Nếu có lỗi (như email không hợp lệ), coi như không tồn tại
+      return false;
+    }
+  }
 }
 

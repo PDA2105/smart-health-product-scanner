@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../data/models/app_user.dart';
@@ -47,6 +48,19 @@ class AuthProvider extends ChangeNotifier {
     await _run(_authRepository.signOut);
   }
 
+  Future<void> resetPassword(String email) async {
+    await _run(() => _authRepository.resetPassword(email: email));
+  }
+
+  Future<bool> checkEmailExists(String email) async {
+    try {
+      return await _authRepository.checkEmailExists(email: email);
+    } catch (e) {
+      _error = e.toString();
+      return false;
+    }
+  }
+
   @override
   void dispose() {
     _userSub?.cancel();
@@ -59,8 +73,31 @@ class AuthProvider extends ChangeNotifier {
       _loading = true;
       notifyListeners();
       return await action();
+    } on FirebaseAuthException catch (e) {
+      // Xử lý lỗi từ Firebase Auth
+      String message;
+      switch (e.code) {
+        case 'user-not-found':
+          message = 'Email này chưa được đăng ký trong hệ thống.';
+          break;
+        case 'invalid-email':
+          message = 'Email không hợp lệ.';
+          break;
+        case 'user-disabled':
+          message = 'Tài khoản này đã bị vô hiệu hóa.';
+          break;
+        case 'too-many-requests':
+          message = 'Quá nhiều yêu cầu. Vui lòng thử lại sau.';
+          break;
+        default:
+          message = e.message ?? 'Có lỗi xảy ra. Vui lòng thử lại.';
+      }
+      _error = message;
+      return null;
     } catch (e) {
-      _error = e.toString();
+      // Xử lý các lỗi khác
+      final errorMessage = e.toString().replaceFirst('Exception: ', '');
+      _error = errorMessage;
       return null;
     } finally {
       _loading = false;

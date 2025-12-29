@@ -7,12 +7,11 @@ import 'data/repositories/auth_repository.dart';
 import 'features/auth/presentation/pages/auth_gate.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
 import 'firebase_options.dart';
+import 'routes/app_routes.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
@@ -24,9 +23,9 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => AuthProvider(
-            AuthRepository(AuthRemoteDataSource()),
-          )..init(),
+          create:
+              (_) =>
+                  AuthProvider(AuthRepository(AuthRemoteDataSource()))..init(),
         ),
       ],
       child: MaterialApp(
@@ -35,7 +34,9 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
           useMaterial3: true,
         ),
+        // AuthGate sẽ quyết định hiển thị Login hay Home dựa vào trạng thái đăng nhập.
         home: const AuthGate(),
+        onGenerateRoute: AppRoutes.generateRoute,
       ),
     );
   }
