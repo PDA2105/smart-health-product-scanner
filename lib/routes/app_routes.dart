@@ -4,11 +4,13 @@ import '../features/auth/presentation/pages/forgot_password_page.dart';
 import '../features/auth/presentation/pages/home_page.dart';
 import '../features/auth/presentation/pages/login_page.dart';
 import '../features/auth/presentation/pages/signup_page.dart';
+import '../features/auth/presentation/pages/start.dart';
 
 class AppRoutes {
   AppRoutes._();
 
   // Route names
+  static const String start = '/start';
   static const String login = '/login';
   static const String signUp = '/signup';
   static const String forgotPassword = '/forgot-password';
@@ -17,6 +19,11 @@ class AppRoutes {
   // Route generator
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case start:
+        return MaterialPageRoute(
+          builder:(_) => const Start(),
+          settings: settings,
+        );
       case login:
         return MaterialPageRoute(
           builder: (_) => const LoginPage(),

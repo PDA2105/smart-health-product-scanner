@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'data/datasources/auth_remote_datasource.dart';
 import 'data/repositories/auth_repository.dart';
-import 'features/auth/presentation/pages/auth_gate.dart';
+import 'features/auth/presentation/pages/start.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
 import 'firebase_options.dart';
 import 'routes/app_routes.dart';
@@ -29,13 +29,13 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Smart Health Product Scanner',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
           useMaterial3: true,
         ),
-        // AuthGate sẽ quyết định hiển thị Login hay Home dựa vào trạng thái đăng nhập.
-        home: const AuthGate(),
+        home: const Start(),
         onGenerateRoute: AppRoutes.generateRoute,
       ),
     );
