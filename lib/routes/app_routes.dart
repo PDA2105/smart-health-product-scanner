@@ -1,78 +1,43 @@
 import 'package:flutter/material.dart';
 
 import '../features/auth/presentation/pages/forgot_password_page.dart';
-import '../features/auth/presentation/pages/home_page.dart';
 import '../features/auth/presentation/pages/login_page.dart';
 import '../features/auth/presentation/pages/signup_page.dart';
 import '../features/auth/presentation/pages/start.dart';
+import '../features/scan/presentation/pages/scan_screen.dart';
 
 class AppRoutes {
-  AppRoutes._();
-
-  // Route names
   static const String start = '/start';
   static const String login = '/login';
-  static const String signUp = '/signup';
-  static const String forgotPassword = '/forgot-password';
-  static const String home = '/home';
+  static const String signUp = '/signUp';
+  static const String forgotPassword = '/forgotPassword';
+  static const String scan = '/scan';
 
-  // Route generator
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case start:
-        return MaterialPageRoute(
-          builder:(_) => const Start(),
-          settings: settings,
-        );
+        return MaterialPageRoute(builder: (_) => const Start());
       case login:
-        return MaterialPageRoute(
-          builder: (_) => const LoginPage(),
-          settings: settings,
-        );
+        return MaterialPageRoute(builder: (_) => const LoginPage());
       case signUp:
-        return MaterialPageRoute(
-          builder: (_) => const SignUpPage(),
-          settings: settings,
-        );
+        return MaterialPageRoute(builder: (_) => const SignUpPage());
       case forgotPassword:
-        return MaterialPageRoute(
-          builder: (_) => const ForgotPasswordPage(),
-          settings: settings,
-        );
-      case home:
-        return MaterialPageRoute(
-          builder: (_) => const HomePage(),
-          settings: settings,
-        );
+        return MaterialPageRoute(builder: (_) => const ForgotPasswordPage());
+      case scan:
+        return MaterialPageRoute(builder: (_) => const ScanScreen());
+      // Default to start page if route is not found
       default:
-        return MaterialPageRoute(
-          builder: (_) => const LoginPage(),
-          settings: settings,
-        );
+        return MaterialPageRoute(builder: (_) => const Start());
     }
   }
 }
 
-// Navigation helper extension
-extension AppRoutesExtension on BuildContext {
-  void navigateToLogin() {
-    Navigator.of(this).pushReplacementNamed(AppRoutes.login);
-  }
-
-  void navigateToSignUp() {
-    Navigator.of(this).pushReplacementNamed(AppRoutes.signUp);
-  }
-
-  void navigateToForgotPassword() {
-    Navigator.of(this).pushNamed(AppRoutes.forgotPassword);
-  }
-
-  void navigateToHome() {
-    Navigator.of(this).pushReplacementNamed(AppRoutes.home);
-  }
-
-  void navigateBack() {
-    Navigator.of(this).pop();
-  }
+extension Navigation on BuildContext {
+  void navigateToStart() => Navigator.of(this).pushReplacementNamed(AppRoutes.start);
+  void navigateToLogin() => Navigator.of(this).pushNamed(AppRoutes.login);
+  void navigateToSignUp() => Navigator.of(this).pushNamed(AppRoutes.signUp);
+  void navigateToForgotPassword() =>
+      Navigator.of(this).pushNamed(AppRoutes.forgotPassword);
+  // Updated to navigate to the Scan screen as the main screen
+  void navigateToHome() => Navigator.of(this).pushReplacementNamed(AppRoutes.scan);
 }
-

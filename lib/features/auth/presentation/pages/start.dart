@@ -60,7 +60,7 @@ class Start extends StatelessWidget {
                   ),
                 ),
                 child: const Text(
-                  'Bắt đầu',
+                  'Start',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),

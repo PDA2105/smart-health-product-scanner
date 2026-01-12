@@ -1,10 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'data/datasources/auth_remote_datasource.dart';
+import 'data/datasources/product_remote_datasource.dart';
 import 'data/repositories/auth_repository.dart';
-import 'features/auth/presentation/pages/start.dart';
+import 'data/repositories/product_repository.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
 import 'firebase_options.dart';
 import 'routes/app_routes.dart';
@@ -22,10 +24,17 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        // --- Auth Providers ---
         ChangeNotifierProvider(
-          create:
-              (_) =>
-                  AuthProvider(AuthRepository(AuthRemoteDataSource()))..init(),
+          create: (_) =>
+              AuthProvider(AuthRepository(AuthRemoteDataSource()))..init(),
+        ),
+        // --- Product Providers ---
+        Provider<ProductRepository>(
+          create: (_) => ProductRepository(
+            FirebaseFirestore.instance,
+            ProductRemoteDataSource(),
+          ),
         ),
       ],
       child: MaterialApp(
@@ -35,7 +44,8 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
           useMaterial3: true,
         ),
-        home: const Start(),
+        // Use initialRoute with onGenerateRoute, not home
+        initialRoute: AppRoutes.start,
         onGenerateRoute: AppRoutes.generateRoute,
       ),
     );
