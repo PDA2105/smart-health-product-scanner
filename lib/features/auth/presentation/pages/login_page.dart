@@ -73,7 +73,14 @@ class _LoginPageState extends State<LoginPage> {
                       _passwordController.text,
                     );
                     if (!mounted) return;
-                    _showErrorIfAny(context, auth.error);
+
+                    // If login is successful (no error), navigate to home.
+                    if (auth.error == null) {
+                      context.navigateToHome();
+                    } else {
+                      // Otherwise, show the error.
+                      _showErrorIfAny(context, auth.error);
+                    }
                   },
                 ),
                 const SizedBox(height: 12),
@@ -82,7 +89,14 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: () async {
                     await auth.signInWithGoogle();
                     if (!mounted) return;
-                    _showErrorIfAny(context, auth.error);
+                    
+                    // If login is successful (no error), navigate to home.
+                    if (auth.error == null) {
+                      context.navigateToHome();
+                    } else {
+                      // Otherwise, show the error.
+                      _showErrorIfAny(context, auth.error);
+                    }
                   },
                 ),
                 const SizedBox(height: 24),
@@ -139,4 +153,3 @@ void _showErrorIfAny(BuildContext context, String? error) {
     SnackBar(content: Text(error)),
   );
 }
-
