@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:openfoodfacts/openfoodfacts.dart';
 
 import 'data/datasources/auth_remote_datasource.dart';
 import 'data/datasources/product_remote_datasource.dart';
@@ -14,6 +15,10 @@ import 'routes/app_routes.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Set the user agent for the OpenFoodFacts API before running the app
+  OpenFoodAPIConfiguration.userAgent = UserAgent(name: 'Smart Health Product Scanner');
+
   runApp(const MyApp());
 }
 

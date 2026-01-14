@@ -44,7 +44,7 @@ dependencies:
   google_sign_in: ^6.2.1
 
   # API
-  openfoodfacts: ^3.0.0
+  openfoodfacts: ^3.29.0
 
   #Core
   mobile_scanner: ^3.5.6
