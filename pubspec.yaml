@@ -45,6 +45,7 @@ dependencies:
 
   # API
   openfoodfacts: ^3.29.0
+  google_generative_ai: ^0.3.0
 
   #Core
   mobile_scanner: ^3.5.6

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../data/models/product_model.dart';
 import '../../../../data/repositories/product_repository.dart';
+import '../../../../routes/app_routes.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -18,7 +19,7 @@ class _ScanScreenState extends State<ScanScreen> {
   final MobileScannerController _scannerController = MobileScannerController(
     detectionSpeed: DetectionSpeed.noDuplicates,
   );
-  
+
   // A flag to prevent multiple scans at the same time
   bool _isProcessing = false;
 
@@ -48,13 +49,13 @@ class _ScanScreenState extends State<ScanScreen> {
     try {
       // 2. Call the repository function to fetch product
       final product = await context.read<ProductRepository>().getProductByBarcode(barcode);
-      
+
       if (!mounted) return;
-      
+
       if (product != null) {
         // Success haptic feedback
         HapticFeedback.lightImpact();
-        
+
         // 3. If a product is found, show a dialog
         _showProductDialog(product);
       } else {
@@ -63,7 +64,7 @@ class _ScanScreenState extends State<ScanScreen> {
     } catch (e) {
       // 4. If an error occurs, show a snackbar
       if (!mounted) return;
-      
+
       // Extract meaningful error message
       String errorMessage = 'Đã xảy ra lỗi khi tìm kiếm sản phẩm.';
       if (e.toString().contains('not found')) {
@@ -71,7 +72,7 @@ class _ScanScreenState extends State<ScanScreen> {
       } else if (e.toString().contains('network')) {
         errorMessage = 'Lỗi kết nối mạng. Vui lòng kiểm tra kết nối internet.';
       }
-      
+
       _showErrorSnackbar(errorMessage);
     } finally {
       // After 2 seconds, allow scanning again to prevent rapid-fire scans
@@ -92,6 +93,12 @@ class _ScanScreenState extends State<ScanScreen> {
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
         actions: [
+          // Camera switch button
+          IconButton(
+            onPressed: () => _scannerController.switchCamera(),
+            icon: const Icon(Icons.cameraswitch),
+            tooltip: 'Đổi camera trước/sau',
+          ),
           // Flash toggle button
           IconButton(
             icon: ValueListenableBuilder(
@@ -114,10 +121,10 @@ class _ScanScreenState extends State<ScanScreen> {
             controller: _scannerController,
             onDetect: _onBarcodeDetected,
           ),
-          
+
           // Scan overlay guide
           _buildScanOverlay(),
-          
+
           // Loading indicator when processing
           if (_isProcessing)
             Container(
@@ -156,7 +163,7 @@ class _ScanScreenState extends State<ScanScreen> {
       child: Column(
         children: [
           const Spacer(flex: 2),
-          
+
           // Scan frame
           Center(
             child: Container(
@@ -174,9 +181,9 @@ class _ScanScreenState extends State<ScanScreen> {
               ),
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Instruction text
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 32),
@@ -190,7 +197,7 @@ class _ScanScreenState extends State<ScanScreen> {
               ),
             ),
           ),
-          
+
           const Spacer(flex: 3),
         ],
       ),
@@ -223,17 +230,17 @@ class _ScanScreenState extends State<ScanScreen> {
                         height: 150,
                         width: 150,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => 
-                          Container(
-                            height: 150,
-                            width: 150,
-                            color: Colors.grey[200],
-                            child: const Icon(
-                              Icons.image_not_supported,
-                              size: 64,
-                              color: Colors.grey,
+                        errorBuilder: (context, error, stackTrace) =>
+                            Container(
+                              height: 150,
+                              width: 150,
+                              color: Colors.grey[200],
+                              child: const Icon(
+                                Icons.image_not_supported,
+                                size: 64,
+                                color: Colors.grey,
+                              ),
                             ),
-                          ),
                         loadingBuilder: (context, child, loadingProgress) {
                           if (loadingProgress == null) return child;
                           return Container(
@@ -248,9 +255,9 @@ class _ScanScreenState extends State<ScanScreen> {
                       ),
                     ),
                   ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Product name
                 Text(
                   product.name ?? 'Sản phẩm không có tên',
@@ -259,16 +266,16 @@ class _ScanScreenState extends State<ScanScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Product details
                 _buildInfoRow(Icons.qr_code, 'Mã vạch', product.barcode),
                 const SizedBox(height: 8),
                 _buildInfoRow(Icons.business, 'Thương hiệu', product.brands ?? 'Không rõ'),
                 const SizedBox(height: 8),
                 _buildInfoRow(Icons.scale, 'Khối lượng', product.quantity ?? 'Không rõ'),
-                
+
                 // Nutriscore and Ecoscore
                 if (product.nutriscore != null || product.ecoscore != null) ...[
                   const SizedBox(height: 16),
@@ -284,9 +291,9 @@ class _ScanScreenState extends State<ScanScreen> {
                     ],
                   ),
                 ],
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Action buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -298,9 +305,12 @@ class _ScanScreenState extends State<ScanScreen> {
                     const SizedBox(width: 8),
                     ElevatedButton.icon(
                       onPressed: () {
+                        // Close dialog first
                         Navigator.of(context).pop();
-                        // TODO: Navigate to product detail page
-                        // Navigator.pushNamed(context, '/product-detail', arguments: product);
+                        // Then navigate using microtask to ensure dialog is closed
+                        Future.microtask(() {
+                          context.navigateToProductDetail(product);
+                        });
                       },
                       icon: const Icon(Icons.info_outline),
                       label: const Text('Chi tiết'),

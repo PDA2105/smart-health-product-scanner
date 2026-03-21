@@ -1,22 +1,33 @@
 import 'package:flutter/material.dart';
 
+import '../data/models/product_model.dart';
 import '../features/auth/presentation/pages/forgot_password_page.dart';
+import '../features/auth/presentation/pages/home_page.dart';
 import '../features/auth/presentation/pages/login_page.dart';
 import '../features/auth/presentation/pages/signup_page.dart';
 import '../features/auth/presentation/pages/start.dart';
+import '../features/product/presentation/pages/product_detail_page.dart';
+import '../features/profile/presentation/pages/profile_edit_page.dart';
+import '../features/profile/presentation/pages/profile_page.dart';
 import '../features/scan/presentation/pages/scan_screen.dart';
 
 class AppRoutes {
   static const String start = '/start';
+  static const String home = '/home';
   static const String login = '/login';
   static const String signUp = '/signUp';
   static const String forgotPassword = '/forgotPassword';
   static const String scan = '/scan';
+  static const String productDetail = '/product-detail';
+  static const String profile = '/profile';
+  static const String profileEdit = '/profile-edit';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case start:
         return MaterialPageRoute(builder: (_) => const Start());
+      case home:
+        return MaterialPageRoute(builder: (_) => const HomePage());
       case login:
         return MaterialPageRoute(builder: (_) => const LoginPage());
       case signUp:
@@ -25,6 +36,15 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const ForgotPasswordPage());
       case scan:
         return MaterialPageRoute(builder: (_) => const ScanScreen());
+      case productDetail:
+        final product = settings.arguments as ProductModel;
+        return MaterialPageRoute(
+          builder: (_) => ProductDetailPage(product: product),
+        );
+      case profile:
+        return MaterialPageRoute(builder: (_) => const ProfilePage());
+      case profileEdit:
+        return MaterialPageRoute(builder: (_) => const ProfileEditPage());
       // Default to start page if route is not found
       default:
         return MaterialPageRoute(builder: (_) => const Start());
@@ -38,6 +58,9 @@ extension Navigation on BuildContext {
   void navigateToSignUp() => Navigator.of(this).pushNamed(AppRoutes.signUp);
   void navigateToForgotPassword() =>
       Navigator.of(this).pushNamed(AppRoutes.forgotPassword);
-  // Updated to navigate to the Scan screen as the main screen
-  void navigateToHome() => Navigator.of(this).pushReplacementNamed(AppRoutes.scan);
+  void navigateToProductDetail(ProductModel product) =>
+      Navigator.of(this).pushNamed(AppRoutes.productDetail, arguments: product);
+  void navigateToHome() => Navigator.of(this).pushReplacementNamed(AppRoutes.home);
+  void navigateToProfile() => Navigator.of(this).pushNamed(AppRoutes.profile);
+  void navigateToProfileEdit() => Navigator.of(this).pushNamed(AppRoutes.profileEdit);
 }

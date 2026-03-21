@@ -4,11 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
 
+import 'core/config/gemini_config.dart';
+import 'core/services/gemini_health_analysis_service.dart';
 import 'data/datasources/auth_remote_datasource.dart';
 import 'data/datasources/product_remote_datasource.dart';
 import 'data/repositories/auth_repository.dart';
 import 'data/repositories/product_repository.dart';
+import 'data/repositories/profile_repository.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
+import 'features/product/presentation/providers/health_analysis_provider.dart';
+import 'features/profile/presentation/providers/profile_provider.dart';
 import 'firebase_options.dart';
 import 'routes/app_routes.dart';
 
@@ -39,6 +44,23 @@ class MyApp extends StatelessWidget {
           create: (_) => ProductRepository(
             FirebaseFirestore.instance,
             ProductRemoteDataSource(),
+          ),
+        ),
+        // --- Profile Providers ---
+        ChangeNotifierProvider(
+          create: (_) => ProfileProvider(
+            ProfileRepository(FirebaseFirestore.instance),
+          ),
+        ),
+        // --- Gemini Health Analysis Provider ---
+        Provider<GeminiHealthAnalysisService>(
+          create: (_) => GeminiHealthAnalysisService(
+            apiKey: GeminiConfig.apiKey,
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => HealthAnalysisProvider(
+            geminiService: context.read<GeminiHealthAnalysisService>(),
           ),
         ),
       ],
