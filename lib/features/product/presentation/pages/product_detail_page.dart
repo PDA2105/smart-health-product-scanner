@@ -4,6 +4,7 @@ import 'package:smart_health_product_scanner/data/models/product_model.dart';
 import 'package:smart_health_product_scanner/features/product/presentation/providers/health_analysis_provider.dart';
 import 'package:smart_health_product_scanner/features/product/presentation/widgets/product_health_analysis_widget.dart';
 import 'package:smart_health_product_scanner/features/profile/presentation/providers/profile_provider.dart';
+import 'package:smart_health_product_scanner/features/wishlist/presentation/providers/wishlist_provider.dart';
 
 /// Product Detail Page - Tích hợp Health Analysis & Figma Design
 class ProductDetailPage extends StatefulWidget {
@@ -28,13 +29,24 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   void _triggerAnalysis() {
     Future.microtask(() {
-      final profileProvider = context.read<ProfileProvider>();
-      final analysisProvider = context.read<HealthAnalysisProvider>();
+      if (!mounted) {
+        debugPrint('⚠️ [ProductDetailPage] Widget not mounted, skipping analysis');
+        return;
+      }
 
-      analysisProvider.analyzeProduct(
-        widget.product,
-        profileProvider.profile,
-      );
+      try {
+        final profileProvider = context.read<ProfileProvider>();
+        final analysisProvider = context.read<HealthAnalysisProvider>();
+
+        debugPrint('🔄 [ProductDetailPage] Triggering analysis for: ${widget.product.name}');
+        analysisProvider.analyzeProduct(
+          widget.product,
+          profileProvider.profile,
+        );
+      } catch (e) {
+        debugPrint('❌ [ProductDetailPage] Error triggering analysis: $e');
+        debugPrintStack(label: 'Stack trace:', maxFrames: 10);
+      }
     });
   }
 
@@ -291,13 +303,30 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             children: [
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Đã thêm vào danh sách yêu thích'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
+                  onPressed: () async {
+                    try {
+                      await context
+                          .read<WishlistProvider>()
+                          .addToWishlist(widget.product);
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Đã thêm vào danh sách yêu thích'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Lỗi: ${e.toString()}'),
+                            duration: const Duration(seconds: 2),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2ECC71),
@@ -343,16 +372,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   }
 
   Color _getNutricoreColor(String? score) {
-    final scoreLower = score?.toLowerCase() ?? '';
-    if (scoreLower.contains('a')) return Colors.green;
-    if (scoreLower.contains('b')) return Colors.lightGreen;
-    if (scoreLower.contains('c')) return Colors.orange;
-    if (scoreLower.contains('d')) return Colors.deepOrange;
-    if (scoreLower.contains('e')) return Colors.red;
-    return Colors.grey;
-  }
-
-  Color _getEcoscoreColor(String? score) {
     final scoreLower = score?.toLowerCase() ?? '';
     if (scoreLower.contains('a')) return Colors.green;
     if (scoreLower.contains('b')) return Colors.lightGreen;

@@ -219,16 +219,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  void _showSnackbar(String message, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.redAccent : const Color(0xFF2ECC71),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
   Widget _buildFooter(BuildContext context) {
     return Container(
       height: 66,
@@ -247,12 +237,12 @@ class _ProfilePageState extends State<ProfilePage> {
           _FooterTab(
             icon: Icons.favorite_border,
             label: 'Favorite',
-            onTap: () => _showSnackbar('Tính năng đang phát triển'),
+            onTap: () => context.navigateToWishlist(),
           ),
           _FooterTab(
             icon: Icons.history,
             label: 'History',
-            onTap: () => _showSnackbar('Tính năng đang phát triển'),
+            onTap: () => context.navigateToScanHistory(),
           ),
           _FooterTab(
             icon: Icons.person_outline,

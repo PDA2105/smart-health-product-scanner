@@ -23,6 +23,8 @@ class HealthAnalysisProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
+  get scoreResult => null;
+
   /// Analyze product based on health profile using Gemini AI
   Future<void> analyzeProduct(
     ProductModel product,
