@@ -59,7 +59,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   @override
   void initState() {
     super.initState();
-    _prefillFromProvider();
+    Future.microtask(_initializeForm);
   }
 
   @override
@@ -71,6 +71,21 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     _phoneController.dispose();
     _locationController.dispose();
     super.dispose();
+  }
+
+  Future<void> _initializeForm() async {
+    final userId = context.read<AuthProvider>().user?.uid;
+    if (userId != null) {
+      final provider = context.read<ProfileProvider>();
+      if (provider.profile == null) {
+        await provider.loadProfile(userId);
+      }
+    }
+
+    if (!mounted) return;
+
+    _prefillFromProvider();
+    setState(() {});
   }
 
   void _prefillFromProvider() {
