@@ -29,6 +29,22 @@ class ProductModel {
 
   /// Creates a [ProductModel] from a Firestore document.
   factory ProductModel.fromMap(Map<String, dynamic> map) {
+    // Convert nutriments: Firestore may store as String, need to convert to number
+    Map<String, dynamic>? nutriments = map['nutriments'] as Map<String, dynamic>?;
+    if (nutriments != null) {
+      nutriments = nutriments.map((key, value) {
+        // If value is String, try to convert to double
+        if (value is String) {
+          try {
+            return MapEntry(key, double.parse(value));
+          } catch (e) {
+            return MapEntry(key, value);
+          }
+        }
+        return MapEntry(key, value);
+      });
+    }
+
     return ProductModel(
       barcode: map['barcode'] as String,
       name: map['name'] as String?,
@@ -40,13 +56,29 @@ class ProductModel {
       ingredients: (map['ingredients'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
-      nutriments: map['nutriments'] as Map<String, dynamic>?,
+      nutriments: nutriments,
       lastUpdated: (map['lastUpdated'] as Timestamp?)?.toDate(),
     );
   }
 
   /// Creates a [ProductModel] from an OpenFoodFacts [Product].
   factory ProductModel.fromApi(Product product) {
+    // Debug: Log nutriments structure
+    print('🔍 [ProductModel.fromApi] Product Nutriments:');
+    if (product.nutriments != null) {
+      // Nutriments is a class with toJson(), let's convert and see what we get
+      final nutrimentMap = product.nutriments!.toJson();
+      print('🔍 [ProductModel.fromApi] Nutriments toJson() keys: ${nutrimentMap.keys.toList()}');
+      // Log non-zero values
+      nutrimentMap.forEach((key, value) {
+        if (value != null && value != 0) {
+          print('  ✓ $key: $value');
+        }
+      });
+    } else {
+      print('  ⚠️ Nutriments là NULL!');
+    }
+
     return ProductModel(
       barcode: product.barcode ?? '',
       name: product.productName,

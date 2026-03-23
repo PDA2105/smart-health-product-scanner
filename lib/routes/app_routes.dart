@@ -9,7 +9,9 @@ import '../features/auth/presentation/pages/start.dart';
 import '../features/product/presentation/pages/product_detail_page.dart';
 import '../features/profile/presentation/pages/profile_edit_page.dart';
 import '../features/profile/presentation/pages/profile_page.dart';
+import '../features/scan/presentation/pages/scan_history_page.dart';
 import '../features/scan/presentation/pages/scan_screen.dart';
+import '../features/wishlist/presentation/pages/wishlist_page.dart';
 
 class AppRoutes {
   static const String start = '/start';
@@ -21,6 +23,8 @@ class AppRoutes {
   static const String productDetail = '/product-detail';
   static const String profile = '/profile';
   static const String profileEdit = '/profile-edit';
+  static const String scanHistory = '/scan-history';
+  static const String wishlist = '/wishlist';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -45,7 +49,11 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const ProfilePage());
       case profileEdit:
         return MaterialPageRoute(builder: (_) => const ProfileEditPage());
-      // Default to start page if route is not found
+      case scanHistory:
+        return MaterialPageRoute(builder: (_) => const ScanHistoryPage());
+      case wishlist:
+        return MaterialPageRoute(builder: (_) => const WishlistPage());
+    // Default to start page if route is not found
       default:
         return MaterialPageRoute(builder: (_) => const Start());
     }
@@ -63,4 +71,6 @@ extension Navigation on BuildContext {
   void navigateToHome() => Navigator.of(this).pushReplacementNamed(AppRoutes.home);
   void navigateToProfile() => Navigator.of(this).pushNamed(AppRoutes.profile);
   void navigateToProfileEdit() => Navigator.of(this).pushNamed(AppRoutes.profileEdit);
+  void navigateToScanHistory() => Navigator.of(this).pushNamed(AppRoutes.scanHistory);
+  void navigateToWishlist() => Navigator.of(this).pushNamed(AppRoutes.wishlist);
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../data/repositories/product_repository.dart';
+import '../../../../features/scan/presentation/providers/scan_history_provider.dart';
 import '../../../../routes/app_routes.dart';
 import '../providers/auth_provider.dart';
 
@@ -87,25 +89,33 @@ class HomePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _StatCard(label: 'Sản phẩm quét', value: '12'),
-                    _StatCard(label: 'Cảnh báo', value: '3'),
-                    _StatCard(label: 'Điểm sức khỏe', value: '7.8'),
-                  ],
-                ),
+              Consumer<ScanHistoryProvider>(
+                builder: (context, scanHistoryProvider, child) {
+                  final todayScans = _getTodayScans(scanHistoryProvider.scanHistory);
+                  final warningCount = _getWarningCount(scanHistoryProvider.scanHistory);
+                  final avgScore = _getAverageScore(scanHistoryProvider.scanHistory);
+
+                  return Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _StatCard(label: 'Sản phẩm quét', value: '$todayScans'),
+                        _StatCard(label: 'Cảnh báo', value: '$warningCount'),
+                        _StatCard(label: 'Điểm sức khỏe', value: avgScore),
+                      ],
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 18),
               Center(
@@ -155,85 +165,200 @@ class HomePage extends StatelessWidget {
                     Expanded(
                       child: _ShortcutTile(
                         icon: Icons.favorite_border,
-                        title: 'Wishlist',
+                        title: 'Favorite',
                         subtitle: 'Sản phẩm yêu thích',
-                        onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Tính năng đang phát triển')),
-                          );
-                        },
+                        onTap: () => context.navigateToWishlist(),
                       ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 20),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
+                    const Text(
                       'Lịch sử gần đây',
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
                     ),
-                    Text(
-                      'Xem tất cả',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Color(0xFF2ECC71),
-                        fontWeight: FontWeight.w500,
+                    GestureDetector(
+                      onTap: () => context.navigateToScanHistory(),
+                      child: const Text(
+                        'Xem tất cả',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Color(0xFF2ECC71),
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 12),
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x14000000),
-                      blurRadius: 10,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE9F7EF),
-                        borderRadius: BorderRadius.circular(16),
+              Consumer<ScanHistoryProvider>(
+                builder: (context, scanHistoryProvider, child) {
+                  final recentScans = scanHistoryProvider.scanHistory;
+                  
+                  // Hiển thị tối đa 2 sản phẩm gần nhất
+                  final displayItems = recentScans.take(2).toList();
+
+                  if (displayItems.isEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x14000000),
+                              blurRadius: 10,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(Icons.history, size: 48, color: Colors.grey[300]),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Chưa có lịch sử quét',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      child: const Icon(Icons.local_drink, color: Color(0xFF27AE60)),
-                    ),
-                    const SizedBox(width: 12),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Bia hơi Heineken',
-                            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+                    );
+                  }
+
+                  return Column(
+                    children: List.generate(
+                      displayItems.length,
+                      (index) {
+                        final item = displayItems[index];
+                        return Padding(
+                          padding: EdgeInsets.only(
+                            left: 16,
+                            right: 16,
+                            bottom: index < displayItems.length - 1 ? 12 : 0,
                           ),
-                          SizedBox(height: 4),
-                          Text(
-                            '5% ABV',
-                            style: TextStyle(fontSize: 14, color: Colors.black54),
+                          child: GestureDetector(
+                            onTap: () async {
+                              // Fetch full product with nutriments from Firestore
+                              try {
+                                final product = await context
+                                    .read<ProductRepository>()
+                                    .getProductByBarcode(
+                                      item.barcode,
+                                      forceRefresh: false, // Use cache if available
+                                    );
+                                if (product != null) {
+                                  context.navigateToProductDetail(product);
+                                } else {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Không thể tải thông tin sản phẩm'),
+                                      ),
+                                    );
+                                  }
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Lỗi: ${e.toString()}'),
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Color(0x14000000),
+                                    blurRadius: 10,
+                                    offset: Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 56,
+                                    height: 56,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFE9F7EF),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: item.productImage != null
+                                        ? ClipRRect(
+                                            borderRadius: BorderRadius.circular(16),
+                                            child: Image.network(
+                                              item.productImage!,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (context, error, stackTrace) =>
+                                                  const Icon(
+                                                Icons.local_drink,
+                                                color: Color(0xFF27AE60),
+                                              ),
+                                            ),
+                                          )
+                                        : const Icon(
+                                            Icons.local_drink,
+                                            color: Color(0xFF27AE60),
+                                          ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          item.productName,
+                                          style: const TextStyle(
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        if (item.brands != null)
+                                          Text(
+                                            item.brands!,
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.black54,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                  Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
+                                ],
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
-                    const Icon(Icons.arrow_forward_ios, size: 16),
-                  ],
-                ),
+                  );
+                },
               ),
             ],
           ),
@@ -257,20 +382,12 @@ class HomePage extends StatelessWidget {
             _FooterTab(
               icon: Icons.favorite_border,
               label: 'Favorite',
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Tính năng đang phát triển')),
-                );
-              },
+              onTap: () => context.navigateToWishlist(),
             ),
             _FooterTab(
               icon: Icons.history,
               label: 'History',
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Tính năng đang phát triển')),
-                );
-              },
+              onTap: () => context.navigateToScanHistory(),
             ),
             _FooterTab(
               icon: Icons.person_outline,
@@ -281,6 +398,58 @@ class HomePage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Lấy số lần quét hôm nay
+  int _getTodayScans(List scans) {
+    final today = DateTime.now();
+    return scans.where((scan) {
+      final scanDate = scan.timestamp;
+      return scanDate.year == today.year &&
+          scanDate.month == today.month &&
+          scanDate.day == today.day;
+    }).length;
+  }
+
+  /// Đếm cảnh báo (sản phẩm có Nutriscore D hoặc E)
+  int _getWarningCount(List scans) {
+    return scans.where((scan) {
+      final score = scan.nutriscore?.toUpperCase() ?? '';
+      return score == 'D' || score == 'E';
+    }).length;
+  }
+
+  /// Tính điểm sức khỏe trung bình
+  /// A=9, B=7, C=5, D=3, E=1
+  String _getAverageScore(List scans) {
+    if (scans.isEmpty) return '0.0';
+
+    double totalScore = 0;
+    for (var scan in scans) {
+      final score = scan.nutriscore?.toUpperCase() ?? '';
+      switch (score) {
+        case 'A':
+          totalScore += 9;
+          break;
+        case 'B':
+          totalScore += 7;
+          break;
+        case 'C':
+          totalScore += 5;
+          break;
+        case 'D':
+          totalScore += 3;
+          break;
+        case 'E':
+          totalScore += 1;
+          break;
+        default:
+          totalScore += 0;
+      }
+    }
+
+    final average = totalScore / scans.length;
+    return average.toStringAsFixed(1);
   }
 }
 

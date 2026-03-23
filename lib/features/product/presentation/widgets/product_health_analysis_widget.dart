@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_health_product_scanner/core/services/gemini_health_analysis_service.dart';
 import 'package:smart_health_product_scanner/data/models/product_model.dart';
-import 'package:smart_health_product_scanner/features/profile/presentation/providers/profile_provider.dart';
 import 'package:smart_health_product_scanner/features/product/presentation/providers/health_analysis_provider.dart';
 
 /// Widget hiển thị kết quả phân tích sức khỏe sản phẩm
@@ -21,20 +20,8 @@ class ProductHealthAnalysisWidget extends StatefulWidget {
 
 class _ProductHealthAnalysisWidgetState
     extends State<ProductHealthAnalysisWidget> {
-  @override
-  void initState() {
-    super.initState();
-    // Phân tích sản phẩm khi widget được tạo
-    Future.microtask(() {
-      final profileProvider = context.read<ProfileProvider>();
-      final analysisProvider = context.read<HealthAnalysisProvider>();
-
-      analysisProvider.analyzeProduct(
-        widget.product,
-        profileProvider.profile,
-      );
-    });
-  }
+  // Analysis is triggered from ProductDetailPage._triggerAnalysis()
+  // to avoid duplicate calls - called only once per product
 
   @override
   Widget build(BuildContext context) {
@@ -152,7 +139,7 @@ class _ProductHealthAnalysisWidgetState
                     strokeWidth: 8,
                     backgroundColor: Colors.white.withOpacity(0.3),
                     valueColor:
-                        AlwaysStoppedAnimation<Color>(Colors.white),
+                    AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
                 ),
                 Column(
@@ -195,10 +182,10 @@ class _ProductHealthAnalysisWidgetState
 
   /// Xây dựng Warning Section
   Widget _buildWarningSection(
-    String title,
-    List<String> warnings,
-    Color color,
-  ) {
+      String title,
+      List<String> warnings,
+      Color color,
+      ) {
     return Card(
       child: Container(
         decoration: BoxDecoration(
@@ -222,7 +209,7 @@ class _ProductHealthAnalysisWidgetState
             ),
             const SizedBox(height: 8),
             ...warnings.map(
-              (warning) => Padding(
+                  (warning) => Padding(
                 padding: const EdgeInsets.only(bottom: 6),
                 child: Text(
                   warning,
@@ -261,7 +248,7 @@ class _ProductHealthAnalysisWidgetState
             ),
             const SizedBox(height: 8),
             ...benefits.map(
-              (benefit) => Padding(
+                  (benefit) => Padding(
                 padding: const EdgeInsets.only(bottom: 6),
                 child: Text(
                   benefit,
@@ -364,10 +351,10 @@ class _ProductHealthAnalysisWidgetState
 
   /// Xây dựng Nutrition Row
   Widget _buildNutritionRow(
-    String label,
-    String value,
-    IconData icon,
-  ) {
+      String label,
+      String value,
+      IconData icon,
+      ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(

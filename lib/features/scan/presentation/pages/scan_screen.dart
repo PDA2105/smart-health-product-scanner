@@ -5,7 +5,8 @@ import 'package:provider/provider.dart';
 
 import '../../../../data/models/product_model.dart';
 import '../../../../data/repositories/product_repository.dart';
-import '../../../../routes/app_routes.dart';
+import '../../../product/presentation/widgets/product_scan_result_dialog.dart';
+import '../providers/scan_history_provider.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -48,13 +49,20 @@ class _ScanScreenState extends State<ScanScreen> {
 
     try {
       // 2. Call the repository function to fetch product
-      final product = await context.read<ProductRepository>().getProductByBarcode(barcode);
+      // forceRefresh: true - always fetch fresh from API to avoid stale cache with 0 nutrients
+      final product = await context.read<ProductRepository>().getProductByBarcode(
+        barcode,
+        forceRefresh: true,
+      );
 
       if (!mounted) return;
 
       if (product != null) {
         // Success haptic feedback
         HapticFeedback.lightImpact();
+
+        // Add to scan history
+        context.read<ScanHistoryProvider>().addToScanHistory(product);
 
         // 3. If a product is found, show a dialog
         _showProductDialog(product);
@@ -209,180 +217,7 @@ class _ScanScreenState extends State<ScanScreen> {
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Product image
-                if (product.imageUrl != null)
-                  Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        product.imageUrl!,
-                        height: 150,
-                        width: 150,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            Container(
-                              height: 150,
-                              width: 150,
-                              color: Colors.grey[200],
-                              child: const Icon(
-                                Icons.image_not_supported,
-                                size: 64,
-                                color: Colors.grey,
-                              ),
-                            ),
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Container(
-                            height: 150,
-                            width: 150,
-                            color: Colors.grey[200],
-                            child: const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-
-                const SizedBox(height: 16),
-
-                // Product name
-                Text(
-                  product.name ?? 'Sản phẩm không có tên',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Product details
-                _buildInfoRow(Icons.qr_code, 'Mã vạch', product.barcode),
-                const SizedBox(height: 8),
-                _buildInfoRow(Icons.business, 'Thương hiệu', product.brands ?? 'Không rõ'),
-                const SizedBox(height: 8),
-                _buildInfoRow(Icons.scale, 'Khối lượng', product.quantity ?? 'Không rõ'),
-
-                // Nutriscore and Ecoscore
-                if (product.nutriscore != null || product.ecoscore != null) ...[
-                  const SizedBox(height: 16),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      if (product.nutriscore != null)
-                        _buildScoreBadge('Nutriscore', product.nutriscore!, Colors.orange),
-                      if (product.ecoscore != null)
-                        _buildScoreBadge('Ecoscore', product.ecoscore!, Colors.green),
-                    ],
-                  ),
-                ],
-
-                const SizedBox(height: 20),
-
-                // Action buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Đóng'),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        // Close dialog first
-                        Navigator.of(context).pop();
-                        // Then navigate using microtask to ensure dialog is closed
-                        Future.microtask(() {
-                          context.navigateToProductDetail(product);
-                        });
-                      },
-                      icon: const Icon(Icons.info_outline),
-                      label: const Text('Chi tiết'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Builds an info row with icon, label and value
-  Widget _buildInfoRow(IconData icon, String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 20, color: Colors.grey[600]),
-        const SizedBox(width: 8),
-        Expanded(
-          child: RichText(
-            text: TextSpan(
-              style: const TextStyle(color: Colors.black87, fontSize: 14),
-              children: [
-                TextSpan(
-                  text: '$label: ',
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                TextSpan(text: value),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Builds a score badge
-  Widget _buildScoreBadge(String label, String score, Color color) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: color, width: 2),
-          ),
-          child: Text(
-            score.toUpperCase(),
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-          ),
-        ),
-      ],
+      builder: (context) => ProductScanResultDialog(product: product),
     );
   }
 

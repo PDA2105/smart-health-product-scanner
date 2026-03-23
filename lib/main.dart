@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -11,9 +12,13 @@ import 'data/datasources/product_remote_datasource.dart';
 import 'data/repositories/auth_repository.dart';
 import 'data/repositories/product_repository.dart';
 import 'data/repositories/profile_repository.dart';
+import 'data/repositories/scan_history_repository.dart';
+import 'data/repositories/wishlist_repository.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
 import 'features/product/presentation/providers/health_analysis_provider.dart';
 import 'features/profile/presentation/providers/profile_provider.dart';
+import 'features/scan/presentation/providers/scan_history_provider.dart';
+import 'features/wishlist/presentation/providers/wishlist_provider.dart';
 import 'firebase_options.dart';
 import 'routes/app_routes.dart';
 
@@ -51,6 +56,30 @@ class MyApp extends StatelessWidget {
           create: (_) => ProfileProvider(
             ProfileRepository(FirebaseFirestore.instance),
           ),
+        ),
+        // --- Scan History Provider ---
+        ChangeNotifierProvider(
+          create: (_) {
+            final userId = fb.FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
+            return ScanHistoryProvider(
+              scanHistoryRepository: ScanHistoryRepository(
+                FirebaseFirestore.instance,
+                userId,
+              ),
+            );
+          },
+        ),
+        // --- Wishlist Provider ---
+        ChangeNotifierProvider(
+          create: (_) {
+            final userId = fb.FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
+            return WishlistProvider(
+              wishlistRepository: WishlistRepository(
+                FirebaseFirestore.instance,
+                userId,
+              ),
+            );
+          },
         ),
         // --- Gemini Health Analysis Provider ---
         Provider<GeminiHealthAnalysisService>(

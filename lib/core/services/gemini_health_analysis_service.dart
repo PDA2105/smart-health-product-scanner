@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:smart_health_product_scanner/core/config/gemini_config.dart';
 import 'package:smart_health_product_scanner/data/models/health_profile.dart';
 import 'package:smart_health_product_scanner/data/models/product_model.dart';
 
@@ -35,7 +37,7 @@ class HealthScoreResult {
 class GeminiHealthAnalysisService {
   GeminiHealthAnalysisService({required String apiKey}) {
     _model = GenerativeModel(
-      model: 'gemini-1.5-flash',
+      model: GeminiConfig.modelName,
       apiKey: apiKey,
     );
   }
@@ -48,23 +50,53 @@ class GeminiHealthAnalysisService {
     HealthProfile? healthProfile,
   ) async {
     try {
+      print('🤖 [GeminiService] Starting analysis for: ${product.name}');
+      print('📦 [GeminiService] Using model: ${GeminiConfig.modelName}');
+      
       // 1. Prepare prompt for Gemini
       final prompt = _buildAnalysisPrompt(product, healthProfile);
+      print('📝 [GeminiService] Prompt prepared (length: ${prompt.length} chars)');
+      print('📝 [GeminiService] First 200 chars: ${prompt.substring(0, (prompt.length > 200 ? 200 : prompt.length))}...');
 
       // 2. Call Gemini API
+      print('⏳ [GeminiService] Calling Gemini API...');
+      final stopwatch = Stopwatch()..start();
       final response = await _model.generateContent(
         [Content.text(prompt)],
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          print('⏱️ [GeminiService] Gemini API timeout after 30 seconds');
+          throw TimeoutException('Gemini API call timeout', const Duration(seconds: 30));
+        },
       );
+      stopwatch.stop();
+      print('✅ [GeminiService] Gemini API response received in ${stopwatch.elapsedMilliseconds}ms');
 
       // 3. Parse AI response
       final aiContent = response.text ?? '';
+      print('📄 [GeminiService] Response length: ${aiContent.length} chars');
+      if (aiContent.isNotEmpty) {
+        print('📄 [GeminiService] Response (first 300 chars): ${aiContent.substring(0, (aiContent.length > 300 ? 300 : aiContent.length))}...');
+      } else {
+        print('⚠️ [GeminiService] Response is EMPTY!');
+      }
 
       // 4. Extract structured data from AI response
+      print('🔄 [GeminiService] Parsing AI response...');
       final analysisData = _parseAIResponse(aiContent, product, healthProfile);
+      print('✅ [GeminiService] Analysis complete! Score: ${analysisData.score}, Rating: ${analysisData.rating}');
 
       return analysisData;
+    } on TimeoutException catch (e) {
+      print('❌ [GeminiService] Timeout Error: $e');
+      print('⚠️ [GeminiService] Using fallback analysis due to timeout');
+      return _getFallbackAnalysis(product, healthProfile);
     } catch (e) {
-      print('❌ Gemini API Error: $e');
+      print('❌ [GeminiService] Gemini API Error: $e');
+      print('   Error type: ${e.runtimeType}');
+      print('   Stack trace: ${StackTrace.current}');
+      print('⚠️ [GeminiService] Using fallback analysis');
       // Fallback to basic analysis if API fails
       return _getFallbackAnalysis(product, healthProfile);
     }
@@ -143,16 +175,23 @@ Chú ý:
     HealthProfile? healthProfile,
   ) {
     try {
+      print('🔄 [GeminiService._parseAIResponse] Attempting to parse response...');
+      
       // Clean JSON from markdown code blocks if present
       String jsonText = aiText;
       if (jsonText.contains('```json')) {
+        print('📝 [GeminiService] Found ```json block, cleaning...');
         jsonText = jsonText.replaceAll('```json', '').replaceAll('```', '');
       } else if (jsonText.contains('```')) {
+        print('📝 [GeminiService] Found ``` block, cleaning...');
         jsonText = jsonText.replaceAll('```', '');
       }
 
+      print('🔍 [GeminiService] Cleaned response length: ${jsonText.length}');
+      
       // Parse JSON
       final Map<String, dynamic> data = _parseJsonString(jsonText);
+      print('✅ [GeminiService] JSON parsed. Keys: ${data.keys.toList()}');
 
       final score = (data['score'] as num?)?.toDouble() ?? 5.0;
       final rating = data['rating'] as String? ?? 'Trung bình';
@@ -166,17 +205,41 @@ Chú ý:
       final aiAnalysis = data['detailedAnalysis'] as String? ??
           'Không thể phân tích sản phẩm này';
 
+      print('💾 [GeminiService] Parsed fields - Score: $score, Rating: $rating');
+
+      // Extract nutrition values with correct key names from API
+      final nutriments = product.nutriments ?? {};
+      print('🔍 [GeminiService] Available nutriment keys: ${nutriments.keys.toList()}');
+      
       final nutritionAnalysis = {
-        'energy': product.nutriments?['energy'] ?? 0,
-        'protein': product.nutriments?['proteins'] ?? 0,
-        'fat': product.nutriments?['fat'] ?? 0,
-        'carbohydrates': product.nutriments?['carbohydrates'] ?? 0,
-        'sugars': product.nutriments?['sugars'] ?? 0,
-        'sodium': product.nutriments?['sodium'] ?? 0,
-        'fiber': product.nutriments?['fiber'] ?? 0,
+        'energy': nutriments['energy-kcal_100g'] ?? 
+                  nutriments['energy-kcal'] ?? 
+                  nutriments['energy-kJ'] ?? 
+                  nutriments['energy'] ?? 0,
+        'protein': nutriments['proteins_100g'] ?? 
+                   nutriments['proteins'] ?? 
+                   nutriments['protein'] ?? 0,
+        'fat': nutriments['fat_100g'] ?? 
+               nutriments['fat'] ?? 0,
+        'carbohydrates': nutriments['carbohydrates_100g'] ?? 
+                         nutriments['carbs_100g'] ?? 
+                         nutriments['carbohydrates'] ?? 0,
+        'sugars': nutriments['sugars_100g'] ?? 
+                  nutriments['sugars'] ?? 
+                  nutriments['sugar'] ?? 0,
+        'sodium': nutriments['sodium_100g'] ?? 
+                  nutriments['salt_100g'] ?? 
+                  nutriments['sodium'] ?? 0,
+        'fiber': nutriments['fiber_100g'] ?? 
+                 nutriments['fiber'] ?? 0,
         'nutriscore': product.nutriscore ?? 'unknown',
         'ecoscore': product.ecoscore ?? 'unknown',
       };
+      
+      print('💾 [GeminiService] Extracted nutrition values:');
+      nutritionAnalysis.forEach((key, value) {
+        print('  $key: $value');
+      });
 
       return HealthScoreResult(
         score: score.clamp(0.0, 10.0),
@@ -189,7 +252,8 @@ Chú ý:
         aiAnalysis: aiAnalysis,
       );
     } catch (e) {
-      print('❌ Parse Error: $e');
+      print('❌ [GeminiService._parseAIResponse] Parse Error: $e');
+      print('   Error type: ${e.runtimeType}');
       return _getFallbackAnalysis(product, healthProfile);
     }
   }
@@ -388,6 +452,33 @@ Chú ý:
       warnings.add('⚠️ Chất lượng dinh dưỡng dưới trung bình');
     }
 
+    // Extract nutrition with correct key names from API
+    final nutriments = product.nutriments ?? {};
+    final nutritionAnalysis = {
+      'energy': nutriments['energy-kcal_100g'] ?? 
+                nutriments['energy-kcal'] ?? 
+                nutriments['energy-kJ'] ?? 
+                nutriments['energy'] ?? 0,
+      'protein': nutriments['proteins_100g'] ?? 
+                 nutriments['proteins'] ?? 
+                 nutriments['protein'] ?? 0,
+      'fat': nutriments['fat_100g'] ?? 
+             nutriments['fat'] ?? 0,
+      'carbohydrates': nutriments['carbohydrates_100g'] ?? 
+                       nutriments['carbs_100g'] ?? 
+                       nutriments['carbohydrates'] ?? 0,
+      'sugars': nutriments['sugars_100g'] ?? 
+                nutriments['sugars'] ?? 
+                nutriments['sugar'] ?? 0,
+      'sodium': nutriments['sodium_100g'] ?? 
+                nutriments['salt_100g'] ?? 
+                nutriments['sodium'] ?? 0,
+      'fiber': nutriments['fiber_100g'] ?? 
+               nutriments['fiber'] ?? 0,
+      'nutriscore': product.nutriscore ?? 'unknown',
+      'ecoscore': product.ecoscore ?? 'unknown',
+    };
+
     return HealthScoreResult(
       score: score,
       rating: score >= 8 ? 'Xuất sắc' : score >= 6 ? 'Tốt' : 'Trung bình',
@@ -395,17 +486,7 @@ Chú ý:
       benefits: [],
       allergieWarnings: [],
       dietWarnings: [],
-      nutritionAnalysis: {
-        'energy': product.nutriments?['energy'] ?? 0,
-        'protein': product.nutriments?['proteins'] ?? 0,
-        'fat': product.nutriments?['fat'] ?? 0,
-        'carbohydrates': product.nutriments?['carbohydrates'] ?? 0,
-        'sugars': product.nutriments?['sugars'] ?? 0,
-        'sodium': product.nutriments?['sodium'] ?? 0,
-        'fiber': product.nutriments?['fiber'] ?? 0,
-        'nutriscore': product.nutriscore ?? 'unknown',
-        'ecoscore': product.ecoscore ?? 'unknown',
-      },
+      nutritionAnalysis: nutritionAnalysis,
       aiAnalysis:
           'Không thể kết nối AI. Dựa vào Nutriscore để đánh giá sản phẩm.',
     );

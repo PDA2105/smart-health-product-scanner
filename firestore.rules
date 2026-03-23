@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Hồ sơ sức khỏe: mỗi user chỉ đọc/ghi hồ sơ của chính mình
+    match /healthProfiles/{userId} {
+      allow read, create, update, delete: if request.auth != null
+                                          && request.auth.uid == userId;
+    }
+
+    // Users collection - quản lý dữ liệu con của user
+    match /users/{userId} {
+      // Profile user (thông tin cá nhân)
+      match /profile/{document=**} {
+        allow read, write: if request.auth != null
+                          && request.auth.uid == userId;
+      }
+
+      // Scan history - mỗi user chỉ quản lý lịch sử của chính mình
+      match /scanHistory/{historyId} {
+        allow read, create, update, delete: if request.auth != null
+                                            && request.auth.uid == userId;
+      }
+
+      // Wishlist - mỗi user chỉ quản lý wishlist của chính mình
+      match /wishlist/{wishlistId} {
+        allow read, create, update, delete: if request.auth != null
+                                            && request.auth.uid == userId;
+      }
+    }
+
+    // Product cache: PUBLIC READ (dữ liệu sản phẩm công khai)
+    // WRITE: Cho phép authenticated users ghi (để cache từ API)
+    match /products/{productId} {
+      allow read: if true;  // Cho phép đọc công khai (nhanh hơn không cần auth)
+      allow write: if request.auth != null; // Cho phép authenticated users cache
+    }
+
+    // Mặc định chặn toàn bộ phần còn lại
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
