@@ -129,7 +129,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
             children: [
               _buildTextField(
                 controller: _nicknameController,
-                label: 'Nickname',
+                label: 'Biệt danh',
                 icon: Icons.badge_outlined,
               ),
               const SizedBox(height: 12),

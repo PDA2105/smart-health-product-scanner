@@ -31,13 +31,13 @@ class WishlistRepository {
           .get();
 
       if (existing.docs.isNotEmpty) {
-        throw Exception('Product already in wishlist');
+        throw Exception('Sản phẩm đã có trong danh sách yêu thích');
       }
 
       final wishlistItem = WishlistItemModel(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         barcode: product.barcode,
-        productName: product.name ?? 'Unknown Product',
+        productName: product.name ?? 'Sản phẩm không xác định',
         productImage: product.imageUrl,
         addedAt: DateTime.now(),
         brands: product.brands,

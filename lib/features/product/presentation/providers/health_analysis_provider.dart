@@ -36,7 +36,7 @@ class HealthAnalysisProvider extends ChangeNotifier {
 
     try {
       if (!GeminiConfig.enableGeminiAI) {
-        _error = 'Gemini AI not enabled';
+        _error = 'Tính năng AI Gemini hiện chưa bật.';
         _isLoading = false;
         notifyListeners();
         return;

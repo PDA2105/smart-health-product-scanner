@@ -28,7 +28,7 @@ class ScanHistoryRepository {
       final historyItem = ScanHistoryModel(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         barcode: product.barcode,
-        productName: product.name ?? 'Unknown Product',
+        productName: product.name ?? 'Sản phẩm không xác định',
         productImage: product.imageUrl,
         timestamp: DateTime.now(),
         brands: product.brands,

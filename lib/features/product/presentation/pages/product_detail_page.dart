@@ -235,7 +235,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               ),
               const SizedBox(width: 8),
               Text(
-                '(1,247 reviews)',
+                '(1.247 đánh giá)',
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey[500],
