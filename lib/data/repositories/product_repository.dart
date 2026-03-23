@@ -113,4 +113,67 @@ class ProductRepository {
       await doc.reference.delete();
     }
   }
+
+  /// Returns healthier alternatives from cached products.
+  ///
+  /// It only uses cached Firestore products, so this call is fast and avoids
+  /// hitting external APIs while the user is browsing alternatives.
+  Future<List<ProductModel>> getHealthierAlternatives(
+    ProductModel currentProduct, {
+    int limit = 12,
+  }) async {
+    final currentRank = _nutriscoreRank(currentProduct.nutriscore);
+
+    if (currentRank <= 1) {
+      return const [];
+    }
+
+    try {
+      final snapshot = await _productsCollection.limit(120).get();
+      final alternatives = snapshot.docs
+          .map((doc) => doc.data())
+          .where((product) => product.barcode != currentProduct.barcode)
+          .where((product) => (product.name ?? '').trim().isNotEmpty)
+          .where((product) {
+            final rank = _nutriscoreRank(product.nutriscore);
+            return rank < currentRank;
+          })
+          .toList();
+
+      alternatives.sort((a, b) {
+        final rankCompare =
+            _nutriscoreRank(a.nutriscore).compareTo(_nutriscoreRank(b.nutriscore));
+        if (rankCompare != 0) return rankCompare;
+        return (a.name ?? '').compareTo(b.name ?? '');
+      });
+
+      if (alternatives.length <= limit) {
+        return alternatives;
+      }
+      return alternatives.take(limit).toList();
+    } catch (e) {
+      AppLogger.error(
+        '[ProductRepository] Error getting healthier alternatives',
+        error: e,
+      );
+      rethrow;
+    }
+  }
+
+  int _nutriscoreRank(String? score) {
+    switch ((score ?? '').toLowerCase()) {
+      case 'a':
+        return 1;
+      case 'b':
+        return 2;
+      case 'c':
+        return 3;
+      case 'd':
+        return 4;
+      case 'e':
+        return 5;
+      default:
+        return 99;
+    }
+  }
 }

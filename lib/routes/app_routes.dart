@@ -7,6 +7,7 @@ import '../features/auth/presentation/pages/home_page.dart';
 import '../features/auth/presentation/pages/login_page.dart';
 import '../features/auth/presentation/pages/signup_page.dart';
 import '../features/auth/presentation/pages/start.dart';
+import '../features/product/presentation/pages/product_alternatives_page.dart';
 import '../features/product/presentation/pages/product_detail_page.dart';
 import '../features/profile/presentation/pages/profile_edit_page.dart';
 import '../features/profile/presentation/pages/profile_page.dart';
@@ -23,6 +24,7 @@ class AppRoutes {
   static const String forgotPassword = '/forgotPassword';
   static const String scan = '/scan';
   static const String productDetail = '/product-detail';
+  static const String productAlternatives = '/product-alternatives';
   static const String profile = '/profile';
   static const String profileEdit = '/profile-edit';
   static const String scanHistory = '/scan-history';
@@ -49,6 +51,11 @@ class AppRoutes {
         return MaterialPageRoute(
           builder: (_) => ProductDetailPage(product: product),
         );
+      case productAlternatives:
+        final product = settings.arguments as ProductModel;
+        return MaterialPageRoute(
+          builder: (_) => ProductAlternativesPage(currentProduct: product),
+        );
       case profile:
         return MaterialPageRoute(builder: (_) => const ProfilePage());
       case profileEdit:
@@ -72,6 +79,8 @@ extension Navigation on BuildContext {
       Navigator.of(this).pushNamed(AppRoutes.forgotPassword);
   void navigateToProductDetail(ProductModel product) =>
       Navigator.of(this).pushNamed(AppRoutes.productDetail, arguments: product);
+    void navigateToProductAlternatives(ProductModel product) => Navigator.of(this)
+      .pushNamed(AppRoutes.productAlternatives, arguments: product);
   void navigateToHome() => Navigator.of(this).pushReplacementNamed(AppRoutes.home);
   void navigateToProfile() => Navigator.of(this).pushNamed(AppRoutes.profile);
   void navigateToProfileEdit() => Navigator.of(this).pushNamed(AppRoutes.profileEdit);

@@ -401,7 +401,7 @@ class _ProductScanResultDialogState extends State<ProductScanResultDialog> {
         OutlinedButton.icon(
           onPressed: () {
             Navigator.of(context).pop();
-            _showHealthierAlternatives(context);
+            context.navigateToProductAlternatives(widget.product);
           },
           icon: const Icon(Icons.health_and_safety, size: 18),
           label: const Text('Tìm giải pháp thay thế'),
@@ -458,42 +458,4 @@ class _ProductScanResultDialogState extends State<ProductScanResultDialog> {
     return Colors.red;
   }
 
-  /// Show healthier alternatives (placeholder)
-  void _showHealthierAlternatives(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Giải pháp thay thế lành mạnh',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Center(
-              child: Column(
-                children: [
-                  Icon(Icons.lightbulb_outline, size: 48, color: Colors.amber),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Tính năng đang phát triển',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
 }
