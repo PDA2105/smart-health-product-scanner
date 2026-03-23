@@ -6,10 +6,10 @@ import '../../../../data/repositories/scan_history_repository.dart';
 
 /// Provider to manage scan history
 class ScanHistoryProvider extends ChangeNotifier {
-  ScanHistoryProvider({required ScanHistoryRepository scanHistoryRepository})
+  ScanHistoryProvider({ScanHistoryRepository? scanHistoryRepository})
       : _scanHistoryRepository = scanHistoryRepository;
 
-  final ScanHistoryRepository _scanHistoryRepository;
+  ScanHistoryRepository? _scanHistoryRepository;
 
   List<ScanHistoryModel> _scanHistory = [];
   bool _isLoading = false;
@@ -19,11 +19,30 @@ class ScanHistoryProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
+  void updateRepository(ScanHistoryRepository? repository) {
+    _scanHistoryRepository = repository;
+    if (repository == null) {
+      _scanHistory = [];
+      _isLoading = false;
+      _error = null;
+      notifyListeners();
+    }
+  }
+
+  bool _ensureRepository() {
+    if (_scanHistoryRepository != null) return true;
+    _error = 'Vui lòng đăng nhập để sử dụng lịch sử quét.';
+    notifyListeners();
+    return false;
+  }
+
   /// Adds a product to scan history
   Future<void> addToScanHistory(ProductModel product) async {
+    if (!_ensureRepository()) return;
+
     try {
       _error = null;
-      await _scanHistoryRepository.addToScanHistory(product);
+      await _scanHistoryRepository!.addToScanHistory(product);
       // Refresh the list
       await loadScanHistory();
     } catch (e) {
@@ -34,12 +53,14 @@ class ScanHistoryProvider extends ChangeNotifier {
 
   /// Loads scan history from the repository
   Future<void> loadScanHistory() async {
+    if (!_ensureRepository()) return;
+
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      _scanHistory = await _scanHistoryRepository.getScanHistory();
+      _scanHistory = await _scanHistoryRepository!.getScanHistory();
       _isLoading = false;
       notifyListeners();
     } catch (e) {
@@ -51,8 +72,10 @@ class ScanHistoryProvider extends ChangeNotifier {
 
   /// Gets recent scan history
   Future<List<ScanHistoryModel>> getRecentScanHistory({int limit = 5}) async {
+    if (!_ensureRepository()) return [];
+
     try {
-      return await _scanHistoryRepository.getRecentScanHistory(limit: limit);
+      return await _scanHistoryRepository!.getRecentScanHistory(limit: limit);
     } catch (e) {
       _error = e.toString();
       notifyListeners();
@@ -62,9 +85,11 @@ class ScanHistoryProvider extends ChangeNotifier {
 
   /// Deletes a scan history item
   Future<void> deleteScanHistoryItem(String id) async {
+    if (!_ensureRepository()) return;
+
     try {
       _error = null;
-      await _scanHistoryRepository.deleteScanHistoryItem(id);
+      await _scanHistoryRepository!.deleteScanHistoryItem(id);
       // Refresh the list
       await loadScanHistory();
     } catch (e) {
@@ -75,9 +100,11 @@ class ScanHistoryProvider extends ChangeNotifier {
 
   /// Clears all scan history
   Future<void> clearScanHistory() async {
+    if (!_ensureRepository()) return;
+
     try {
       _error = null;
-      await _scanHistoryRepository.clearScanHistory();
+      await _scanHistoryRepository!.clearScanHistory();
       _scanHistory = [];
       notifyListeners();
     } catch (e) {

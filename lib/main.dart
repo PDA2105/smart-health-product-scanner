@@ -58,27 +58,45 @@ class MyApp extends StatelessWidget {
           ),
         ),
         // --- Scan History Provider ---
-        ChangeNotifierProvider(
-          create: (_) {
-            final userId = fb.FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
-            return ScanHistoryProvider(
-              scanHistoryRepository: ScanHistoryRepository(
+        ChangeNotifierProxyProvider<AuthProvider, ScanHistoryProvider>(
+          create: (_) => ScanHistoryProvider(),
+          update: (_, authProvider, scanHistoryProvider) {
+            final provider = scanHistoryProvider ?? ScanHistoryProvider();
+            final userId = authProvider.user?.uid;
+
+            if (userId == null || userId.isEmpty) {
+              provider.updateRepository(null);
+              return provider;
+            }
+
+            provider.updateRepository(
+              ScanHistoryRepository(
                 FirebaseFirestore.instance,
                 userId,
               ),
             );
+            return provider;
           },
         ),
         // --- Wishlist Provider ---
-        ChangeNotifierProvider(
-          create: (_) {
-            final userId = fb.FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
-            return WishlistProvider(
-              wishlistRepository: WishlistRepository(
+        ChangeNotifierProxyProvider<AuthProvider, WishlistProvider>(
+          create: (_) => WishlistProvider(),
+          update: (_, authProvider, wishlistProvider) {
+            final provider = wishlistProvider ?? WishlistProvider();
+            final userId = authProvider.user?.uid;
+
+            if (userId == null || userId.isEmpty) {
+              provider.updateRepository(null);
+              return provider;
+            }
+
+            provider.updateRepository(
+              WishlistRepository(
                 FirebaseFirestore.instance,
                 userId,
               ),
             );
+            return provider;
           },
         ),
         // --- Gemini Health Analysis Provider ---

@@ -6,10 +6,10 @@ import '../../../../data/repositories/wishlist_repository.dart';
 
 /// Provider to manage wishlist
 class WishlistProvider extends ChangeNotifier {
-  WishlistProvider({required WishlistRepository wishlistRepository})
+  WishlistProvider({WishlistRepository? wishlistRepository})
       : _wishlistRepository = wishlistRepository;
 
-  final WishlistRepository _wishlistRepository;
+  WishlistRepository? _wishlistRepository;
 
   List<WishlistItemModel> _wishlist = [];
   bool _isLoading = false;
@@ -19,11 +19,30 @@ class WishlistProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
+  void updateRepository(WishlistRepository? repository) {
+    _wishlistRepository = repository;
+    if (repository == null) {
+      _wishlist = [];
+      _isLoading = false;
+      _error = null;
+      notifyListeners();
+    }
+  }
+
+  bool _ensureRepository() {
+    if (_wishlistRepository != null) return true;
+    _error = 'Vui lòng đăng nhập để sử dụng danh sách yêu thích.';
+    notifyListeners();
+    return false;
+  }
+
   /// Adds a product to wishlist
   Future<void> addToWishlist(ProductModel product, {String? note}) async {
+    if (!_ensureRepository()) return;
+
     try {
       _error = null;
-      await _wishlistRepository.addToWishlist(product, note: note);
+      await _wishlistRepository!.addToWishlist(product, note: note);
       // Refresh the list
       await loadWishlist();
     } catch (e) {
@@ -34,12 +53,14 @@ class WishlistProvider extends ChangeNotifier {
 
   /// Loads wishlist from the repository
   Future<void> loadWishlist() async {
+    if (!_ensureRepository()) return;
+
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      _wishlist = await _wishlistRepository.getWishlist();
+      _wishlist = await _wishlistRepository!.getWishlist();
       _isLoading = false;
       notifyListeners();
     } catch (e) {
@@ -51,8 +72,10 @@ class WishlistProvider extends ChangeNotifier {
 
   /// Checks if a product is in wishlist
   Future<bool> isInWishlist(String barcode) async {
+    if (!_ensureRepository()) return false;
+
     try {
-      return await _wishlistRepository.isInWishlist(barcode);
+      return await _wishlistRepository!.isInWishlist(barcode);
     } catch (e) {
       _error = e.toString();
       notifyListeners();
@@ -62,9 +85,11 @@ class WishlistProvider extends ChangeNotifier {
 
   /// Removes a product from wishlist by item ID
   Future<void> removeFromWishlist(String itemId) async {
+    if (!_ensureRepository()) return;
+
     try {
       _error = null;
-      await _wishlistRepository.removeFromWishlist(itemId);
+      await _wishlistRepository!.removeFromWishlist(itemId);
       // Refresh the list
       await loadWishlist();
     } catch (e) {
@@ -75,9 +100,11 @@ class WishlistProvider extends ChangeNotifier {
 
   /// Removes a product from wishlist by barcode
   Future<void> removeFromWishlistByBarcode(String barcode) async {
+    if (!_ensureRepository()) return;
+
     try {
       _error = null;
-      await _wishlistRepository.removeFromWishlistByBarcode(barcode);
+      await _wishlistRepository!.removeFromWishlistByBarcode(barcode);
       // Refresh the list
       await loadWishlist();
     } catch (e) {
@@ -88,9 +115,11 @@ class WishlistProvider extends ChangeNotifier {
 
   /// Clears all wishlist
   Future<void> clearWishlist() async {
+    if (!_ensureRepository()) return;
+
     try {
       _error = null;
-      await _wishlistRepository.clearWishlist();
+      await _wishlistRepository!.clearWishlist();
       _wishlist = [];
       notifyListeners();
     } catch (e) {
@@ -101,9 +130,11 @@ class WishlistProvider extends ChangeNotifier {
 
   /// Updates the note on a wishlist item
   Future<void> updateWishlistNote(String itemId, String note) async {
+    if (!_ensureRepository()) return;
+
     try {
       _error = null;
-      await _wishlistRepository.updateWishlistNote(itemId, note);
+      await _wishlistRepository!.updateWishlistNote(itemId, note);
       // Refresh the list
       await loadWishlist();
     } catch (e) {
