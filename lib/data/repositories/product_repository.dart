@@ -94,6 +94,11 @@ class ProductRepository {
     return docSnapshot.data();
   }
 
+  /// Fetches a product from Firestore cache only (no API fallback).
+  Future<ProductModel?> getCachedProductByBarcode(String barcode) {
+    return _getProductFromFirestore(barcode);
+  }
+
   /// Saves a product to the Firestore cache.
   Future<void> _cacheProductInFirestore(ProductModel product) {
     return _productsCollection.doc(product.barcode).set(product);
