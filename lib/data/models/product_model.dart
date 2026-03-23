@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
 
+import '../../core/services/app_logger.dart';
+
 /// A data model for a product.
 class ProductModel {
   const ProductModel({
@@ -64,19 +66,21 @@ class ProductModel {
   /// Creates a [ProductModel] from an OpenFoodFacts [Product].
   factory ProductModel.fromApi(Product product) {
     // Debug: Log nutriments structure
-    print('🔍 [ProductModel.fromApi] Product Nutriments:');
+    AppLogger.debug('[ProductModel.fromApi] Product nutriments:');
     if (product.nutriments != null) {
       // Nutriments is a class with toJson(), let's convert and see what we get
       final nutrimentMap = product.nutriments!.toJson();
-      print('🔍 [ProductModel.fromApi] Nutriments toJson() keys: ${nutrimentMap.keys.toList()}');
+      AppLogger.debug(
+        '[ProductModel.fromApi] Nutriments toJson() keys: ${nutrimentMap.keys.toList()}',
+      );
       // Log non-zero values
       nutrimentMap.forEach((key, value) {
         if (value != null && value != 0) {
-          print('  ✓ $key: $value');
+          AppLogger.debug('  $key: $value');
         }
       });
     } else {
-      print('  ⚠️ Nutriments là NULL!');
+      AppLogger.warn('[ProductModel.fromApi] Nutriments is null');
     }
 
     return ProductModel(

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../core/services/app_logger.dart';
 import '../models/product_model.dart';
 import '../models/wishlist_item_model.dart';
 
@@ -31,13 +32,13 @@ class WishlistRepository {
           .get();
 
       if (existing.docs.isNotEmpty) {
-        throw Exception('Product already in wishlist');
+        throw Exception('Sản phẩm đã có trong danh sách yêu thích');
       }
 
       final wishlistItem = WishlistItemModel(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         barcode: product.barcode,
-        productName: product.name ?? 'Unknown Product',
+        productName: product.name ?? 'Sản phẩm không xác định',
         productImage: product.imageUrl,
         addedAt: DateTime.now(),
         brands: product.brands,
@@ -47,7 +48,10 @@ class WishlistRepository {
 
       await _wishlistCollection.doc(wishlistItem.id).set(wishlistItem);
     } catch (e) {
-      print('Error adding to wishlist: $e');
+      AppLogger.error(
+        '[WishlistRepository] Error adding to wishlist',
+        error: e,
+      );
       rethrow;
     }
   }
@@ -60,7 +64,10 @@ class WishlistRepository {
 
       return querySnapshot.docs.map((doc) => doc.data()).toList();
     } catch (e) {
-      print('Error getting wishlist: $e');
+      AppLogger.error(
+        '[WishlistRepository] Error getting wishlist',
+        error: e,
+      );
       rethrow;
     }
   }
@@ -74,7 +81,10 @@ class WishlistRepository {
 
       return querySnapshot.docs.isNotEmpty;
     } catch (e) {
-      print('Error checking wishlist: $e');
+      AppLogger.error(
+        '[WishlistRepository] Error checking wishlist',
+        error: e,
+      );
       return false;
     }
   }
@@ -84,7 +94,10 @@ class WishlistRepository {
     try {
       await _wishlistCollection.doc(itemId).delete();
     } catch (e) {
-      print('Error removing from wishlist: $e');
+      AppLogger.error(
+        '[WishlistRepository] Error removing from wishlist',
+        error: e,
+      );
       rethrow;
     }
   }
@@ -100,7 +113,10 @@ class WishlistRepository {
         await doc.reference.delete();
       }
     } catch (e) {
-      print('Error removing from wishlist: $e');
+      AppLogger.error(
+        '[WishlistRepository] Error removing from wishlist by barcode',
+        error: e,
+      );
       rethrow;
     }
   }
@@ -113,7 +129,10 @@ class WishlistRepository {
         await doc.reference.delete();
       }
     } catch (e) {
-      print('Error clearing wishlist: $e');
+      AppLogger.error(
+        '[WishlistRepository] Error clearing wishlist',
+        error: e,
+      );
       rethrow;
     }
   }
@@ -123,7 +142,10 @@ class WishlistRepository {
     try {
       await _wishlistCollection.doc(itemId).update({'note': note});
     } catch (e) {
-      print('Error updating wishlist note: $e');
+      AppLogger.error(
+        '[WishlistRepository] Error updating wishlist note',
+        error: e,
+      );
       rethrow;
     }
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_health_product_scanner/core/services/app_logger.dart';
 
 import '../../../../data/models/product_model.dart';
 import '../../../../routes/app_routes.dart';
@@ -28,12 +29,16 @@ class _ProductScanResultDialogState extends State<ProductScanResultDialog> {
     // Trigger health analysis when dialog opens (only once)
     Future.microtask(() {
       if (!mounted) {
-        debugPrint('⚠️ [ProductScanResultDialog] Widget not mounted, skipping analysis');
+        AppLogger.warn(
+          '[ProductScanResultDialog] Widget not mounted, skipping analysis',
+        );
         return;
       }
 
       try {
-        debugPrint('🔄 [ProductScanResultDialog] Triggering analysis for: ${widget.product.name}');
+        AppLogger.debug(
+          '[ProductScanResultDialog] Triggering analysis for: ${widget.product.name}',
+        );
         // Lấy profile người dùng để phân tích chính xác hơn
         final profile = context.read<ProfileProvider>().profile;
 
@@ -43,8 +48,11 @@ class _ProductScanResultDialogState extends State<ProductScanResultDialog> {
           profile,
         );
       } catch (e) {
-        debugPrint('❌ [ProductScanResultDialog] Error triggering health analysis: $e');
-        debugPrintStack(label: 'Stack trace:', maxFrames: 10);
+        AppLogger.error(
+          '[ProductScanResultDialog] Error triggering health analysis',
+          error: e,
+          stackTrace: StackTrace.current,
+        );
       }
     });
   }
@@ -136,7 +144,7 @@ class _ProductScanResultDialogState extends State<ProductScanResultDialog> {
                       children: [
                         if (widget.product.nutriscore != null)
                           _buildScoreBadge(
-                            'Nutriscore',
+                            'Điểm Nutri',
                             widget.product.nutriscore!,
                             Colors.orange,
                           ),
@@ -144,7 +152,7 @@ class _ProductScanResultDialogState extends State<ProductScanResultDialog> {
                           const SizedBox(width: 12),
                         if (widget.product.ecoscore != null)
                           _buildScoreBadge(
-                            'Ecoscore',
+                            'Điểm Eco',
                             widget.product.ecoscore!,
                             Colors.green,
                           ),
@@ -368,7 +376,10 @@ class _ProductScanResultDialogState extends State<ProductScanResultDialog> {
                 arguments: widget.product,
               );
             } catch (e) {
-              debugPrint('❌ [ProductScanResultDialog] Navigation error: $e');
+              AppLogger.error(
+                '[ProductScanResultDialog] Navigation error',
+                error: e,
+              );
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Lỗi: $e')),
               );

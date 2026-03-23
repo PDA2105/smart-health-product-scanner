@@ -59,7 +59,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   @override
   void initState() {
     super.initState();
-    _prefillFromProvider();
+    Future.microtask(_initializeForm);
   }
 
   @override
@@ -71,6 +71,21 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     _phoneController.dispose();
     _locationController.dispose();
     super.dispose();
+  }
+
+  Future<void> _initializeForm() async {
+    final userId = context.read<AuthProvider>().user?.uid;
+    if (userId != null) {
+      final provider = context.read<ProfileProvider>();
+      if (provider.profile == null) {
+        await provider.loadProfile(userId);
+      }
+    }
+
+    if (!mounted) return;
+
+    _prefillFromProvider();
+    setState(() {});
   }
 
   void _prefillFromProvider() {
@@ -101,7 +116,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Profile'),
+        title: const Text('Chỉnh sửa hồ sơ'),
         backgroundColor: const Color(0xFF2ECC71),
         foregroundColor: Colors.white,
       ),
@@ -114,7 +129,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
             children: [
               _buildTextField(
                 controller: _nicknameController,
-                label: 'Nickname',
+                label: 'Biệt danh',
                 icon: Icons.badge_outlined,
               ),
               const SizedBox(height: 12),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/models/product_model.dart';
 import '../features/auth/presentation/pages/forgot_password_page.dart';
+import '../features/auth/presentation/pages/auth_gate.dart';
 import '../features/auth/presentation/pages/home_page.dart';
 import '../features/auth/presentation/pages/login_page.dart';
 import '../features/auth/presentation/pages/signup_page.dart';
@@ -14,6 +15,7 @@ import '../features/scan/presentation/pages/scan_screen.dart';
 import '../features/wishlist/presentation/pages/wishlist_page.dart';
 
 class AppRoutes {
+  static const String authGate = '/';
   static const String start = '/start';
   static const String home = '/home';
   static const String login = '/login';
@@ -28,6 +30,8 @@ class AppRoutes {
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case authGate:
+        return MaterialPageRoute(builder: (_) => const AuthGate());
       case start:
         return MaterialPageRoute(builder: (_) => const Start());
       case home:
@@ -53,9 +57,9 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const ScanHistoryPage());
       case wishlist:
         return MaterialPageRoute(builder: (_) => const WishlistPage());
-    // Default to start page if route is not found
+    // Default to auth gate if route is not found
       default:
-        return MaterialPageRoute(builder: (_) => const Start());
+        return MaterialPageRoute(builder: (_) => const AuthGate());
     }
   }
 }

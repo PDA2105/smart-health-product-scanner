@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -119,7 +118,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         // Use initialRoute with onGenerateRoute, not home
-        initialRoute: AppRoutes.start,
+        initialRoute: AppRoutes.authGate,
         onGenerateRoute: AppRoutes.generateRoute,
       ),
     );

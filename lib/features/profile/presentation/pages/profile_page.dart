@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../data/models/scan_history_model.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../scan/presentation/providers/scan_history_provider.dart';
 import '../providers/profile_provider.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -24,21 +26,23 @@ class _ProfilePageState extends State<ProfilePage> {
     if (userId == null) return;
 
     await context.read<ProfileProvider>().loadProfile(userId);
+    await context.read<ScanHistoryProvider>().loadScanHistory();
   }
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final profileProvider = context.watch<ProfileProvider>();
+    final scanHistory = context.watch<ScanHistoryProvider>().scanHistory;
     final profile = profileProvider.profile;
-    final email = auth.user?.email ?? 'you@example.com';
+    final email = auth.user?.email ?? 'Chưa cập nhật';
     final nickname = profile?.nickname?.trim();
     final displayName = auth.user?.displayName?.trim();
     final effectiveName = (nickname != null && nickname.isNotEmpty)
       ? nickname
       : (displayName != null && displayName.isNotEmpty)
         ? displayName
-        : 'Thanh Tung';
+        : 'Bạn';
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -54,12 +58,12 @@ class _ProfilePageState extends State<ProfilePage> {
                     const SizedBox(height: 20),
                     _buildProfileHeader(effectiveName),
                     const SizedBox(height: 18),
-                    _buildScanSummary(),
+                    _buildScanSummary(scanHistory),
                     const SizedBox(height: 16),
                     _buildContactRows(
                       email: email,
-                      phone: profile?.phone ?? '+84 12345678',
-                      location: profile?.location ?? 'Thanh Hoa, VN',
+                      phone: profile?.phone ?? 'Chưa cập nhật',
+                      location: profile?.location ?? 'Chưa cập nhật',
                     ),
                     const SizedBox(height: 22),
                     _buildActionButtons(context),
@@ -115,7 +119,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           const SizedBox(height: 2),
           const Text(
-            'Active User',
+            'Người dùng hoạt động',
             style: TextStyle(
               color: Color(0xFF2ECC71),
               fontSize: 16,
@@ -127,7 +131,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildScanSummary() {
+  Widget _buildScanSummary(List<ScanHistoryModel> scans) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -137,19 +141,19 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         const SizedBox(height: 14),
         Row(
-          children: const [
+          children: [
             Expanded(
               child: _SummaryCard(
-                title: 'Total scans',
-                value: '125',
+                title: 'Tổng lượt quét',
+                value: '${scans.length}',
                 valueColor: Colors.black,
               ),
             ),
-            SizedBox(width: 14),
+            const SizedBox(width: 14),
             Expanded(
               child: _SummaryCard(
-                title: 'Average Score',
-                value: 'B+',
+                title: 'Điểm trung bình',
+                value: _getAverageNutriscore(scans),
                 valueColor: Color(0xFF2ECC71),
               ),
             ),
@@ -157,6 +161,50 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ],
     );
+  }
+
+  String _getAverageNutriscore(List<ScanHistoryModel> scans) {
+    if (scans.isEmpty) return '--';
+
+    double total = 0;
+    int count = 0;
+
+    for (final scan in scans) {
+      final nutriscore = scan.nutriscore?.toUpperCase();
+      if (nutriscore == null) continue;
+
+      switch (nutriscore) {
+        case 'A':
+          total += 5;
+          count++;
+          break;
+        case 'B':
+          total += 4;
+          count++;
+          break;
+        case 'C':
+          total += 3;
+          count++;
+          break;
+        case 'D':
+          total += 2;
+          count++;
+          break;
+        case 'E':
+          total += 1;
+          count++;
+          break;
+      }
+    }
+
+    if (count == 0) return '--';
+
+    final avg = total / count;
+    if (avg >= 4.5) return 'A';
+    if (avg >= 3.5) return 'B';
+    if (avg >= 2.5) return 'C';
+    if (avg >= 1.5) return 'D';
+    return 'E';
   }
 
   Widget _buildContactRows({
@@ -168,9 +216,9 @@ class _ProfilePageState extends State<ProfilePage> {
       children: [
         _InfoRow(icon: Icons.email_outlined, label: 'Email', value: email),
         const SizedBox(height: 12),
-        _InfoRow(icon: Icons.phone, label: 'Phone', value: phone),
+        _InfoRow(icon: Icons.phone, label: 'Số điện thoại', value: phone),
         const SizedBox(height: 12),
-        _InfoRow(icon: Icons.location_on_outlined, label: 'Location', value: location),
+        _InfoRow(icon: Icons.location_on_outlined, label: 'Địa chỉ', value: location),
       ],
     );
   }
@@ -187,7 +235,7 @@ class _ProfilePageState extends State<ProfilePage> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             ),
             child: const Text(
-              'Edit Profile',
+              'Chỉnh sửa hồ sơ',
               style: TextStyle(
                 color: Color(0xFF2ECC71),
                 fontWeight: FontWeight.w500,
@@ -210,7 +258,7 @@ class _ProfilePageState extends State<ProfilePage> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             ),
             child: const Text(
-              'Logout',
+              'Đăng xuất',
               style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
             ),
           ),
@@ -231,22 +279,22 @@ class _ProfilePageState extends State<ProfilePage> {
         children: [
           _FooterTab(
             icon: Icons.home_outlined,
-            label: 'Home',
+            label: 'Trang chủ',
             onTap: () => context.navigateToHome(),
           ),
           _FooterTab(
             icon: Icons.favorite_border,
-            label: 'Favorite',
+            label: 'Yêu thích',
             onTap: () => context.navigateToWishlist(),
           ),
           _FooterTab(
             icon: Icons.history,
-            label: 'History',
+            label: 'Lịch sử',
             onTap: () => context.navigateToScanHistory(),
           ),
           _FooterTab(
             icon: Icons.person_outline,
-            label: 'Profile',
+            label: 'Hồ sơ',
             active: true,
             onTap: () {},
           ),

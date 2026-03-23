@@ -137,7 +137,7 @@ class _WishlistPageState extends State<WishlistPage> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Thêm sản phẩm vào wishlist để xem lại sau',
+                          'Thêm sản phẩm vào danh sách yêu thích để xem lại sau',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey[500],
@@ -345,23 +345,23 @@ class _WishlistPageState extends State<WishlistPage> {
           children: [
             _FooterTab(
               icon: Icons.home_outlined,
-              label: 'Home',
+              label: 'Trang chủ',
               onTap: () => context.navigateToHome(),
             ),
             _FooterTab(
               icon: Icons.favorite_border,
-              label: 'Favorite',
+              label: 'Yêu thích',
               active: true,
               onTap: () {},
             ),
             _FooterTab(
               icon: Icons.history,
-              label: 'History',
+              label: 'Lịch sử',
               onTap: () => context.navigateToScanHistory(),
             ),
             _FooterTab(
               icon: Icons.person_outline,
-              label: 'Profile',
+              label: 'Hồ sơ',
               onTap: () => context.navigateToProfile(),
             ),
           ],
@@ -375,7 +375,7 @@ class _WishlistPageState extends State<WishlistPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Xóa wishlist?'),
+        title: const Text('Xóa danh sách yêu thích?'),
         content: const Text('Bạn có chắc muốn xóa tất cả sản phẩm yêu thích?'),
         actions: [
           TextButton(

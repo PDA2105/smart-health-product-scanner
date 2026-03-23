@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:smart_health_product_scanner/core/config/gemini_config.dart';
+import 'package:smart_health_product_scanner/core/services/app_logger.dart';
 import 'package:smart_health_product_scanner/core/services/gemini_health_analysis_service.dart';
 import 'package:smart_health_product_scanner/data/models/health_profile.dart';
 import 'package:smart_health_product_scanner/data/models/product_model.dart';
@@ -36,7 +37,7 @@ class HealthAnalysisProvider extends ChangeNotifier {
 
     try {
       if (!GeminiConfig.enableGeminiAI) {
-        _error = 'Gemini AI not enabled';
+        _error = 'Tính năng AI Gemini hiện chưa bật.';
         _isLoading = false;
         notifyListeners();
         return;
@@ -52,7 +53,10 @@ class HealthAnalysisProvider extends ChangeNotifier {
       _error = '❌ Lỗi phân tích với AI: ${e.toString()}';
       _isLoading = false;
       notifyListeners();
-      print(_error);
+      AppLogger.error(
+        '[HealthAnalysisProvider] Lỗi phân tích với AI',
+        error: e,
+      );
     }
   }
 

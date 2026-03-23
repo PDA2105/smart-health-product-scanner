@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_health_product_scanner/core/services/app_logger.dart';
 import 'package:smart_health_product_scanner/data/models/product_model.dart';
 import 'package:smart_health_product_scanner/features/product/presentation/providers/health_analysis_provider.dart';
 import 'package:smart_health_product_scanner/features/product/presentation/widgets/product_health_analysis_widget.dart';
@@ -30,7 +31,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   void _triggerAnalysis() {
     Future.microtask(() {
       if (!mounted) {
-        debugPrint('⚠️ [ProductDetailPage] Widget not mounted, skipping analysis');
+        AppLogger.warn('[ProductDetailPage] Widget not mounted, skipping analysis');
         return;
       }
 
@@ -38,14 +39,19 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         final profileProvider = context.read<ProfileProvider>();
         final analysisProvider = context.read<HealthAnalysisProvider>();
 
-        debugPrint('🔄 [ProductDetailPage] Triggering analysis for: ${widget.product.name}');
+        AppLogger.debug(
+          '[ProductDetailPage] Triggering analysis for: ${widget.product.name}',
+        );
         analysisProvider.analyzeProduct(
           widget.product,
           profileProvider.profile,
         );
       } catch (e) {
-        debugPrint('❌ [ProductDetailPage] Error triggering analysis: $e');
-        debugPrintStack(label: 'Stack trace:', maxFrames: 10);
+        AppLogger.error(
+          '[ProductDetailPage] Error triggering analysis',
+          error: e,
+          stackTrace: StackTrace.current,
+        );
       }
     });
   }
@@ -235,7 +241,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               ),
               const SizedBox(width: 8),
               Text(
-                '(1,247 reviews)',
+                '(1.247 đánh giá)',
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey[500],

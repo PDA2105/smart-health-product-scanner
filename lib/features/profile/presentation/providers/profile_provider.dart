@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:smart_health_product_scanner/core/services/app_logger.dart';
 
 import '/data/models/health_profile.dart';
 import '/data/repositories/profile_repository.dart';
@@ -27,7 +28,10 @@ class ProfileProvider extends ChangeNotifier {
       _profile = await _repository.getProfileByUserId(userId);
     } catch (e) {
       _error = 'Không thể tải hồ sơ sức khỏe: ${e.toString()}';
-      print(_error);
+      AppLogger.error(
+        '[ProfileProvider] Không thể tải hồ sơ sức khỏe',
+        error: e,
+      );
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -50,7 +54,10 @@ class ProfileProvider extends ChangeNotifier {
       _error = 'Không thể lưu hồ sơ sức khỏe: ${e.toString()}';
       _isLoading = false;
       notifyListeners();
-      print(_error);
+      AppLogger.error(
+        '[ProfileProvider] Không thể lưu hồ sơ sức khỏe',
+        error: e,
+      );
       return false;
     }
   }
@@ -71,7 +78,10 @@ class ProfileProvider extends ChangeNotifier {
       _error = 'Không thể xóa hồ sơ sức khỏe: ${e.toString()}';
       _isLoading = false;
       notifyListeners();
-      print(_error);
+      AppLogger.error(
+        '[ProfileProvider] Không thể xóa hồ sơ sức khỏe',
+        error: e,
+      );
       return false;
     }
   }

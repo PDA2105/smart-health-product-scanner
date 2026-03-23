@@ -134,7 +134,7 @@ class HomePage extends StatelessWidget {
                     ),
                     icon: const Icon(Icons.qr_code_scanner),
                     label: const Text(
-                      'Scan',
+                      'Quét',
                       style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
                     ),
                   ),
@@ -144,7 +144,7 @@ class HomePage extends StatelessWidget {
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
-                  'Shortcuts',
+                  'Lối tắt',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
                 ),
               ),
@@ -165,7 +165,7 @@ class HomePage extends StatelessWidget {
                     Expanded(
                       child: _ShortcutTile(
                         icon: Icons.favorite_border,
-                        title: 'Favorite',
+                        title: 'Yêu thích',
                         subtitle: 'Sản phẩm yêu thích',
                         onTap: () => context.navigateToWishlist(),
                       ),
@@ -375,23 +375,23 @@ class HomePage extends StatelessWidget {
           children: [
             _FooterTab(
               icon: Icons.home_outlined,
-              label: 'Home',
+              label: 'Trang chủ',
               active: true,
               onTap: () {},
             ),
             _FooterTab(
               icon: Icons.favorite_border,
-              label: 'Favorite',
+              label: 'Yêu thích',
               onTap: () => context.navigateToWishlist(),
             ),
             _FooterTab(
               icon: Icons.history,
-              label: 'History',
+              label: 'Lịch sử',
               onTap: () => context.navigateToScanHistory(),
             ),
             _FooterTab(
               icon: Icons.person_outline,
-              label: 'Profile',
+              label: 'Hồ sơ',
               onTap: () => context.navigateToProfile(),
             ),
           ],

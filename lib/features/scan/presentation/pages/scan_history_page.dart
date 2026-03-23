@@ -311,23 +311,23 @@ class _ScanHistoryPageState extends State<ScanHistoryPage> {
           children: [
             _FooterTab(
               icon: Icons.home_outlined,
-              label: 'Home',
+              label: 'Trang chủ',
               onTap: () => context.navigateToHome(),
             ),
             _FooterTab(
               icon: Icons.favorite_border,
-              label: 'Favorite',
+              label: 'Yêu thích',
               onTap: () => context.navigateToWishlist(),
             ),
             _FooterTab(
               icon: Icons.history,
-              label: 'History',
+              label: 'Lịch sử',
               active: true,
               onTap: () {},
             ),
             _FooterTab(
               icon: Icons.person_outline,
-              label: 'Profile',
+              label: 'Hồ sơ',
               onTap: () => context.navigateToProfile(),
             ),
           ],
