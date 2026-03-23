@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:smart_health_product_scanner/core/config/gemini_config.dart';
+import 'package:smart_health_product_scanner/core/services/app_logger.dart';
 import 'package:smart_health_product_scanner/data/models/health_profile.dart';
 import 'package:smart_health_product_scanner/data/models/product_model.dart';
 
@@ -50,53 +51,65 @@ class GeminiHealthAnalysisService {
     HealthProfile? healthProfile,
   ) async {
     try {
-      print('🤖 [GeminiService] Starting analysis for: ${product.name}');
-      print('📦 [GeminiService] Using model: ${GeminiConfig.modelName}');
+      AppLogger.debug('[GeminiService] Starting analysis for: ${product.name}');
+      AppLogger.debug('[GeminiService] Using model: ${GeminiConfig.modelName}');
       
       // 1. Prepare prompt for Gemini
       final prompt = _buildAnalysisPrompt(product, healthProfile);
-      print('📝 [GeminiService] Prompt prepared (length: ${prompt.length} chars)');
-      print('📝 [GeminiService] First 200 chars: ${prompt.substring(0, (prompt.length > 200 ? 200 : prompt.length))}...');
+      AppLogger.debug(
+        '[GeminiService] Prompt prepared (length: ${prompt.length} chars)',
+      );
+      AppLogger.debug(
+        '[GeminiService] First 200 chars: ${prompt.substring(0, (prompt.length > 200 ? 200 : prompt.length))}...',
+      );
 
       // 2. Call Gemini API
-      print('⏳ [GeminiService] Calling Gemini API...');
+      AppLogger.debug('[GeminiService] Calling Gemini API...');
       final stopwatch = Stopwatch()..start();
       final response = await _model.generateContent(
         [Content.text(prompt)],
       ).timeout(
         const Duration(seconds: 30),
         onTimeout: () {
-          print('⏱️ [GeminiService] Gemini API timeout after 30 seconds');
+          AppLogger.warn('[GeminiService] Gemini API timeout after 30 seconds');
           throw TimeoutException('Gemini API call timeout', const Duration(seconds: 30));
         },
       );
       stopwatch.stop();
-      print('✅ [GeminiService] Gemini API response received in ${stopwatch.elapsedMilliseconds}ms');
+      AppLogger.debug(
+        '[GeminiService] Gemini API response received in ${stopwatch.elapsedMilliseconds}ms',
+      );
 
       // 3. Parse AI response
       final aiContent = response.text ?? '';
-      print('📄 [GeminiService] Response length: ${aiContent.length} chars');
+      AppLogger.debug('[GeminiService] Response length: ${aiContent.length} chars');
       if (aiContent.isNotEmpty) {
-        print('📄 [GeminiService] Response (first 300 chars): ${aiContent.substring(0, (aiContent.length > 300 ? 300 : aiContent.length))}...');
+        AppLogger.debug(
+          '[GeminiService] Response (first 300 chars): ${aiContent.substring(0, (aiContent.length > 300 ? 300 : aiContent.length))}...',
+        );
       } else {
-        print('⚠️ [GeminiService] Response is EMPTY!');
+        AppLogger.warn('[GeminiService] Response is empty');
       }
 
       // 4. Extract structured data from AI response
-      print('🔄 [GeminiService] Parsing AI response...');
+      AppLogger.debug('[GeminiService] Parsing AI response...');
       final analysisData = _parseAIResponse(aiContent, product, healthProfile);
-      print('✅ [GeminiService] Analysis complete! Score: ${analysisData.score}, Rating: ${analysisData.rating}');
+      AppLogger.debug(
+        '[GeminiService] Analysis complete. Score: ${analysisData.score}, Rating: ${analysisData.rating}',
+      );
 
       return analysisData;
     } on TimeoutException catch (e) {
-      print('❌ [GeminiService] Timeout Error: $e');
-      print('⚠️ [GeminiService] Using fallback analysis due to timeout');
+      AppLogger.error('[GeminiService] Timeout error', error: e);
+      AppLogger.warn('[GeminiService] Using fallback analysis due to timeout');
       return _getFallbackAnalysis(product, healthProfile);
     } catch (e) {
-      print('❌ [GeminiService] Gemini API Error: $e');
-      print('   Error type: ${e.runtimeType}');
-      print('   Stack trace: ${StackTrace.current}');
-      print('⚠️ [GeminiService] Using fallback analysis');
+      AppLogger.error(
+        '[GeminiService] Gemini API error. Type: ${e.runtimeType}',
+        error: e,
+        stackTrace: StackTrace.current,
+      );
+      AppLogger.warn('[GeminiService] Using fallback analysis');
       // Fallback to basic analysis if API fails
       return _getFallbackAnalysis(product, healthProfile);
     }
@@ -175,23 +188,23 @@ Chú ý:
     HealthProfile? healthProfile,
   ) {
     try {
-      print('🔄 [GeminiService._parseAIResponse] Attempting to parse response...');
+      AppLogger.debug('[GeminiService._parseAIResponse] Attempting to parse response...');
       
       // Clean JSON from markdown code blocks if present
       String jsonText = aiText;
       if (jsonText.contains('```json')) {
-        print('📝 [GeminiService] Found ```json block, cleaning...');
+        AppLogger.debug('[GeminiService] Found json markdown block, cleaning...');
         jsonText = jsonText.replaceAll('```json', '').replaceAll('```', '');
       } else if (jsonText.contains('```')) {
-        print('📝 [GeminiService] Found ``` block, cleaning...');
+        AppLogger.debug('[GeminiService] Found markdown block, cleaning...');
         jsonText = jsonText.replaceAll('```', '');
       }
 
-      print('🔍 [GeminiService] Cleaned response length: ${jsonText.length}');
+      AppLogger.debug('[GeminiService] Cleaned response length: ${jsonText.length}');
       
       // Parse JSON
       final Map<String, dynamic> data = _parseJsonString(jsonText);
-      print('✅ [GeminiService] JSON parsed. Keys: ${data.keys.toList()}');
+      AppLogger.debug('[GeminiService] JSON parsed. Keys: ${data.keys.toList()}');
 
       final score = (data['score'] as num?)?.toDouble() ?? 5.0;
       final rating = data['rating'] as String? ?? 'Trung bình';
@@ -205,11 +218,13 @@ Chú ý:
       final aiAnalysis = data['detailedAnalysis'] as String? ??
           'Không thể phân tích sản phẩm này';
 
-      print('💾 [GeminiService] Parsed fields - Score: $score, Rating: $rating');
+      AppLogger.debug('[GeminiService] Parsed fields. Score: $score, Rating: $rating');
 
       // Extract nutrition values with correct key names from API
       final nutriments = product.nutriments ?? {};
-      print('🔍 [GeminiService] Available nutriment keys: ${nutriments.keys.toList()}');
+      AppLogger.debug(
+        '[GeminiService] Available nutriment keys: ${nutriments.keys.toList()}',
+      );
       
       final nutritionAnalysis = {
         'energy': nutriments['energy-kcal_100g'] ?? 
@@ -236,9 +251,9 @@ Chú ý:
         'ecoscore': product.ecoscore ?? 'unknown',
       };
       
-      print('💾 [GeminiService] Extracted nutrition values:');
+      AppLogger.debug('[GeminiService] Extracted nutrition values:');
       nutritionAnalysis.forEach((key, value) {
-        print('  $key: $value');
+        AppLogger.debug('  $key: $value');
       });
 
       return HealthScoreResult(
@@ -252,8 +267,10 @@ Chú ý:
         aiAnalysis: aiAnalysis,
       );
     } catch (e) {
-      print('❌ [GeminiService._parseAIResponse] Parse Error: $e');
-      print('   Error type: ${e.runtimeType}');
+      AppLogger.error(
+        '[GeminiService._parseAIResponse] Parse error. Type: ${e.runtimeType}',
+        error: e,
+      );
       return _getFallbackAnalysis(product, healthProfile);
     }
   }
@@ -270,7 +287,7 @@ Chú ý:
         try {
           return _jsonDecode(jsonMatch.group(0)!) as Map<String, dynamic>;
         } catch (e2) {
-          print('❌ JSON Extraction Error: $e2');
+          AppLogger.error('[GeminiService] JSON extraction error', error: e2);
           return {};
         }
       }

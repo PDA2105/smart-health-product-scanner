@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../core/services/app_logger.dart';
 import '../datasources/product_remote_datasource.dart';
 import '../models/product_model.dart';
 
@@ -30,18 +31,20 @@ class ProductRepository {
     bool forceRefresh = false,
   }) async {
     try {
-      print('🔍 [ProductRepository] Fetching product: $barcode (forceRefresh: $forceRefresh)');
+      AppLogger.debug(
+        '[ProductRepository] Fetching product: $barcode (forceRefresh: $forceRefresh)',
+      );
       
       // 1. Try to get the product from Firestore cache (unless forceRefresh is true).
       if (!forceRefresh) {
         final productFromFirestore = await _getProductFromFirestore(barcode);
         if (productFromFirestore != null) {
-          print('✅ [ProductRepository] Found in Firestore cache');
+          AppLogger.debug('[ProductRepository] Found in Firestore cache');
           // Debug: Log cached nutriments
           if (productFromFirestore.nutriments != null) {
-            print('🔍 [ProductRepository] Cached nutriments:');
+            AppLogger.debug('[ProductRepository] Cached nutriments:');
             productFromFirestore.nutriments!.forEach((key, value) {
-              print('  $key: $value');
+              AppLogger.debug('  $key: $value');
             });
           }
           
@@ -51,14 +54,16 @@ class ProductRepository {
               (productFromFirestore.nutriments!.values.every((v) => v == 0 || v == null || v == '0'));
           
           if (hasEmptyNutrients) {
-            print('⚠️ [ProductRepository] Cached nutriments are empty, fetching fresh from API...');
+            AppLogger.warn(
+              '[ProductRepository] Cached nutriments are empty, fetching fresh from API...',
+            );
           } else {
             return productFromFirestore;
           }
         }
       }
 
-      print('⏳ [ProductRepository] Fetching from API...');
+      AppLogger.debug('[ProductRepository] Fetching from API...');
       // 2. If not in Firestore or forceRefresh, fetch from the remote API.
       final productFromApi =
           await _remoteDataSource.fetchProductFromApi(barcode);
@@ -68,14 +73,17 @@ class ProductRepository {
         throw Exception('Product with barcode $barcode not found.');
       }
 
-      print('✅ [ProductRepository] Fetched from API, caching in Firestore...');
+      AppLogger.debug('[ProductRepository] Fetched from API, caching in Firestore...');
       // 3. Cache the new product in Firestore for future requests.
       await _cacheProductInFirestore(productFromApi);
 
       return productFromApi;
     } catch (e) {
       // Log the error and rethrow to be handled by the upper layer (e.g., UI).
-      print('❌ Error getting product by barcode $barcode: $e');
+      AppLogger.error(
+        '[ProductRepository] Error getting product by barcode $barcode',
+        error: e,
+      );
       rethrow;
     }
   }
@@ -93,13 +101,13 @@ class ProductRepository {
 
   /// Clear cache for a specific barcode (for debugging/refresh)
   Future<void> clearCacheForBarcode(String barcode) async {
-    print('🧹 [ProductRepository] Clearing cache for barcode: $barcode');
+    AppLogger.debug('[ProductRepository] Clearing cache for barcode: $barcode');
     await _productsCollection.doc(barcode).delete();
   }
 
   /// Clear all cached products
   Future<void> clearAllCache() async {
-    print('🧹 [ProductRepository] Clearing all cached products');
+    AppLogger.debug('[ProductRepository] Clearing all cached products');
     final snapshot = await _productsCollection.get();
     for (var doc in snapshot.docs) {
       await doc.reference.delete();

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../core/services/app_logger.dart';
 import '../models/health_profile.dart';
 
 /// Repository to handle health profile operations.
@@ -22,7 +23,10 @@ class ProfileRepository {
       final docSnapshot = await _profilesCollection.doc(userId).get();
       return docSnapshot.data();
     } catch (e) {
-      print('Error getting health profile for user $userId: $e');
+      AppLogger.error(
+        '[ProfileRepository] Error getting health profile for user $userId',
+        error: e,
+      );
       rethrow;
     }
   }
@@ -32,7 +36,10 @@ class ProfileRepository {
     try {
       await _profilesCollection.doc(profile.userId).set(profile);
     } catch (e) {
-      print('Error saving health profile: $e');
+      AppLogger.error(
+        '[ProfileRepository] Error saving health profile',
+        error: e,
+      );
       rethrow;
     }
   }
@@ -42,7 +49,10 @@ class ProfileRepository {
     try {
       await _profilesCollection.doc(userId).delete();
     } catch (e) {
-      print('Error deleting health profile: $e');
+      AppLogger.error(
+        '[ProfileRepository] Error deleting health profile',
+        error: e,
+      );
       rethrow;
     }
   }

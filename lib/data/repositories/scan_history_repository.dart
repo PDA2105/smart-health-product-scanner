@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../core/services/app_logger.dart';
 import '../models/product_model.dart';
 import '../models/scan_history_model.dart';
 
@@ -37,7 +38,10 @@ class ScanHistoryRepository {
 
       await _scanHistoryCollection.doc(historyItem.id).set(historyItem);
     } catch (e) {
-      print('Error adding to scan history: $e');
+      AppLogger.error(
+        '[ScanHistoryRepository] Error adding to scan history',
+        error: e,
+      );
       rethrow;
     }
   }
@@ -51,7 +55,10 @@ class ScanHistoryRepository {
 
       return querySnapshot.docs.map((doc) => doc.data()).toList();
     } catch (e) {
-      print('Error getting scan history: $e');
+      AppLogger.error(
+        '[ScanHistoryRepository] Error getting scan history',
+        error: e,
+      );
       rethrow;
     }
   }
@@ -66,7 +73,10 @@ class ScanHistoryRepository {
 
       return querySnapshot.docs.map((doc) => doc.data()).toList();
     } catch (e) {
-      print('Error getting recent scan history: $e');
+      AppLogger.error(
+        '[ScanHistoryRepository] Error getting recent scan history',
+        error: e,
+      );
       rethrow;
     }
   }
@@ -76,7 +86,10 @@ class ScanHistoryRepository {
     try {
       await _scanHistoryCollection.doc(id).delete();
     } catch (e) {
-      print('Error deleting scan history item: $e');
+      AppLogger.error(
+        '[ScanHistoryRepository] Error deleting scan history item',
+        error: e,
+      );
       rethrow;
     }
   }
@@ -89,7 +102,10 @@ class ScanHistoryRepository {
         await doc.reference.delete();
       }
     } catch (e) {
-      print('Error clearing scan history: $e');
+      AppLogger.error(
+        '[ScanHistoryRepository] Error clearing scan history',
+        error: e,
+      );
       rethrow;
     }
   }
