@@ -24,7 +24,7 @@ class Start extends StatelessWidget {
             top: 100,
             left: 30, // cách mép trái
             child: Text(
-              "Hello",
+              'Xin chào',
               style: TextStyle(
                 fontFamily: 'BBHBartle',
                 color: Colors.green,
@@ -37,7 +37,7 @@ class Start extends StatelessWidget {
             top: 160,
             left: 30,
             child: Text(
-              "Welcome to Smart Health Product Scanner",
+              'Chào mừng bạn đến với Smart Health Product Scanner',
               style: TextStyle(
                 fontFamily: 'StoryScript',
                 color: Colors.green,
@@ -60,7 +60,7 @@ class Start extends StatelessWidget {
                   ),
                 ),
                 child: const Text(
-                  'Start',
+                  'Bắt đầu',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),

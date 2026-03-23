@@ -116,7 +116,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Profile'),
+        title: const Text('Chỉnh sửa hồ sơ'),
         backgroundColor: const Color(0xFF2ECC71),
         foregroundColor: Colors.white,
       ),

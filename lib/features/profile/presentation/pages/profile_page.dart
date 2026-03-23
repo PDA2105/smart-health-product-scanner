@@ -119,7 +119,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           const SizedBox(height: 2),
           const Text(
-            'Active User',
+            'Người dùng hoạt động',
             style: TextStyle(
               color: Color(0xFF2ECC71),
               fontSize: 16,
@@ -144,7 +144,7 @@ class _ProfilePageState extends State<ProfilePage> {
           children: [
             Expanded(
               child: _SummaryCard(
-                title: 'Total scans',
+                title: 'Tổng lượt quét',
                 value: '${scans.length}',
                 valueColor: Colors.black,
               ),
@@ -152,7 +152,7 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(width: 14),
             Expanded(
               child: _SummaryCard(
-                title: 'Average Score',
+                title: 'Điểm trung bình',
                 value: _getAverageNutriscore(scans),
                 valueColor: Color(0xFF2ECC71),
               ),
@@ -216,9 +216,9 @@ class _ProfilePageState extends State<ProfilePage> {
       children: [
         _InfoRow(icon: Icons.email_outlined, label: 'Email', value: email),
         const SizedBox(height: 12),
-        _InfoRow(icon: Icons.phone, label: 'Phone', value: phone),
+        _InfoRow(icon: Icons.phone, label: 'Số điện thoại', value: phone),
         const SizedBox(height: 12),
-        _InfoRow(icon: Icons.location_on_outlined, label: 'Location', value: location),
+        _InfoRow(icon: Icons.location_on_outlined, label: 'Địa chỉ', value: location),
       ],
     );
   }
@@ -235,7 +235,7 @@ class _ProfilePageState extends State<ProfilePage> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             ),
             child: const Text(
-              'Edit Profile',
+              'Chỉnh sửa hồ sơ',
               style: TextStyle(
                 color: Color(0xFF2ECC71),
                 fontWeight: FontWeight.w500,
@@ -258,7 +258,7 @@ class _ProfilePageState extends State<ProfilePage> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             ),
             child: const Text(
-              'Logout',
+              'Đăng xuất',
               style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
             ),
           ),
@@ -279,22 +279,22 @@ class _ProfilePageState extends State<ProfilePage> {
         children: [
           _FooterTab(
             icon: Icons.home_outlined,
-            label: 'Home',
+            label: 'Trang chủ',
             onTap: () => context.navigateToHome(),
           ),
           _FooterTab(
             icon: Icons.favorite_border,
-            label: 'Favorite',
+            label: 'Yêu thích',
             onTap: () => context.navigateToWishlist(),
           ),
           _FooterTab(
             icon: Icons.history,
-            label: 'History',
+            label: 'Lịch sử',
             onTap: () => context.navigateToScanHistory(),
           ),
           _FooterTab(
             icon: Icons.person_outline,
-            label: 'Profile',
+            label: 'Hồ sơ',
             active: true,
             onTap: () {},
           ),
