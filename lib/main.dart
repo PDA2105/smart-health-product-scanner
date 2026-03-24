@@ -11,11 +11,13 @@ import 'core/services/gemini_health_analysis_service.dart';
 import 'data/datasources/auth_remote_datasource.dart';
 import 'data/datasources/product_remote_datasource.dart';
 import 'data/repositories/auth_repository.dart';
+import 'data/repositories/health_tracking_repository.dart';
 import 'data/repositories/product_repository.dart';
 import 'data/repositories/profile_repository.dart';
 import 'data/repositories/scan_history_repository.dart';
 import 'data/repositories/wishlist_repository.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
+import 'features/health_tracking/presentation/providers/health_tracking_provider.dart';
 import 'features/product/presentation/providers/health_analysis_provider.dart';
 import 'features/profile/presentation/providers/profile_provider.dart';
 import 'features/scan/presentation/providers/scan_history_provider.dart';
@@ -98,6 +100,27 @@ class MyApp extends StatelessWidget {
 
             provider.updateRepository(
               WishlistRepository(
+                FirebaseFirestore.instance,
+                userId,
+              ),
+            );
+            return provider;
+          },
+        ),
+        // --- Health Tracking Provider ---
+        ChangeNotifierProxyProvider<AuthProvider, HealthTrackingProvider>(
+          create: (_) => HealthTrackingProvider(),
+          update: (_, authProvider, healthTrackingProvider) {
+            final provider = healthTrackingProvider ?? HealthTrackingProvider();
+            final userId = authProvider.user?.uid;
+
+            if (userId == null || userId.isEmpty) {
+              provider.updateRepository(null);
+              return provider;
+            }
+
+            provider.updateRepository(
+              HealthTrackingRepository(
                 FirebaseFirestore.instance,
                 userId,
               ),

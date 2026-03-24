@@ -27,6 +27,30 @@ service cloud.firestore {
         allow read, create, update, delete: if request.auth != null
                                             && request.auth.uid == userId;
       }
+
+      // Weight entries - Theo dõi cân nặng
+      match /weightEntries/{entryId} {
+        allow read, create, update, delete: if request.auth != null
+                                            && request.auth.uid == userId;
+      }
+
+      // Health score entries - Theo dõi điểm sức khỏe
+      match /healthScoreEntries/{scoreId} {
+        allow read, create, update, delete: if request.auth != null
+                                            && request.auth.uid == userId;
+      }
+
+      // Health goals - Mục tiêu sức khỏe
+      match /healthGoals/{goalId} {
+        allow read, create, update, delete: if request.auth != null
+                                            && request.auth.uid == userId;
+      }
+
+      // Catch-all for any other subcollections under users/{userId}
+      match /{subcollection}/{document=**} {
+        allow read, write: if request.auth != null
+                          && request.auth.uid == userId;
+      }
     }
 
     // Product cache: PUBLIC READ (dữ liệu sản phẩm công khai)
