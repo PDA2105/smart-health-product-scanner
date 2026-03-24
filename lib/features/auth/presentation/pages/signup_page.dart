@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../routes/app_routes.dart';
+import '../../../scan/presentation/providers/scan_history_provider.dart';
 import '../providers/auth_provider.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -146,7 +147,13 @@ class _SignUpPageState extends State<SignUpPage> {
                                   _passwordController.text,
                                 );
                                 if (!mounted) return;
-                                _showErrorIfAny(context, auth.error);
+                                if (auth.error == null) {
+                                  // Load scan history and wishlist data after signup
+                                  context.read<ScanHistoryProvider>().loadScanHistory();
+                                  context.navigateToHome();
+                                } else {
+                                  _showErrorIfAny(context, auth.error);
+                                }
                               },
                         child: auth.isLoading
                             ? const SizedBox(

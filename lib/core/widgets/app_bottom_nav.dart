@@ -15,25 +15,19 @@ class AppBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 66,
+      height: 70,
       decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(top: BorderSide(color: Color(0xFFE6E6E6))),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _TabItem(
             icon: Icons.home_outlined,
             label: 'Trang chủ',
             active: current == AppBottomNavItem.home,
             onTap: () => _navigate(context, AppBottomNavItem.home),
-          ),
-          _TabItem(
-            icon: Icons.qr_code_scanner_rounded,
-            label: 'Quét',
-            active: current == AppBottomNavItem.scan,
-            onTap: () => _navigate(context, AppBottomNavItem.scan),
           ),
           _TabItem(
             icon: Icons.favorite_border,
@@ -63,13 +57,6 @@ class AppBottomNav extends StatelessWidget {
       return;
     }
 
-    // Scan is an action-like destination: keep previous page in stack
-    // so users can go back after scanning.
-    if (target == AppBottomNavItem.scan) {
-      Navigator.of(context).pushNamed(AppRoutes.scan);
-      return;
-    }
-
     String routeName;
     switch (target) {
       case AppBottomNavItem.home:
@@ -89,7 +76,7 @@ class AppBottomNav extends StatelessWidget {
         break;
     }
 
-    Navigator.of(context).pushReplacementNamed(routeName);
+    Navigator.of(context).pushNamed(routeName);
   }
 }
 

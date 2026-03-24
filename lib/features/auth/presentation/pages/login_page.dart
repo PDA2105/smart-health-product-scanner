@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../routes/app_routes.dart';
+import '../../../scan/presentation/providers/scan_history_provider.dart';
 import '../providers/auth_provider.dart';
 
 class LoginPage extends StatefulWidget {
@@ -140,6 +141,8 @@ class _LoginPageState extends State<LoginPage> {
                                 );
                                 if (!mounted) return;
                                 if (auth.error == null) {
+                                  // Load scan history and wishlist data after login
+                                  context.read<ScanHistoryProvider>().loadScanHistory();
                                   context.navigateToHome();
                                 } else {
                                   _showErrorIfAny(context, auth.error);
@@ -178,6 +181,8 @@ class _LoginPageState extends State<LoginPage> {
                           await auth.signInWithGoogle();
                           if (!mounted) return;
                           if (auth.error == null) {
+                            // Load scan history and wishlist data after login
+                            context.read<ScanHistoryProvider>().loadScanHistory();
                             context.navigateToHome();
                           } else {
                             _showErrorIfAny(context, auth.error);

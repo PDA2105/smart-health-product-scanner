@@ -223,8 +223,8 @@ class HomePage extends StatelessWidget {
                 builder: (context, scanHistoryProvider, child) {
                   final recentScans = scanHistoryProvider.scanHistory;
 
-                  // Hiển thị tối đa 2 sản phẩm gần nhất
-                  final displayItems = recentScans.take(2).toList();
+                  // Hiển thị tối đa 3 sản phẩm gần nhất
+                  final displayItems = recentScans.take(3).toList();
 
                   if (displayItems.isEmpty) {
                     return Padding(

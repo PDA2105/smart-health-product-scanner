@@ -1,6 +1,8 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 /// Gem API Configuration
 class GeminiConfig {
-  static const String apiKey = 'AIzaSyBcEECZauP0U4f28KQWZxaLrnJtsQB2X0w';
+  static String get apiKey => dotenv.env['GEMINI_API_KEY'] ?? '';
   static const String modelName = 'gemini-flash-latest'; // Test newest model
   
   /// Enable/disable Gemini AI features
