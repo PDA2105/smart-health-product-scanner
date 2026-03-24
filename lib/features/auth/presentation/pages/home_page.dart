@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/widgets/app_bottom_nav.dart';
 import '../../../../data/repositories/product_repository.dart';
 import '../../../../features/scan/presentation/providers/scan_history_provider.dart';
 import '../../../../routes/app_routes.dart';
@@ -12,8 +13,6 @@ class _HomeColors {
   static const primary = Color(0xFF2ECC71);
   static const softPrimary = Color(0x5CD0E7CF);
   static const textMuted = Color(0xFF767A77);
-  static const borderLight = Color(0xFFE6E6E6);
-  static const iconInactive = Color(0xFF9CA3AF);
 }
 
 class HomePage extends StatelessWidget {
@@ -28,10 +27,7 @@ class HomePage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: _HomeColors.pageBackground,
-      appBar: AppBar(
-        toolbarHeight: 0,
-        backgroundColor: _HomeColors.primary,
-      ),
+      appBar: AppBar(toolbarHeight: 0, backgroundColor: _HomeColors.primary),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.only(bottom: 24),
@@ -52,7 +48,11 @@ class HomePage extends StatelessWidget {
                     const CircleAvatar(
                       radius: 30,
                       backgroundColor: _HomeColors.softPrimary,
-                      child: Icon(Icons.person, size: 32, color: Colors.black54),
+                      child: Icon(
+                        Icons.person,
+                        size: 32,
+                        color: Colors.black54,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -81,7 +81,9 @@ class HomePage extends StatelessWidget {
                     IconButton(
                       onPressed: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Bạn chưa có thông báo mới')),
+                          const SnackBar(
+                            content: Text('Bạn chưa có thông báo mới'),
+                          ),
                         );
                       },
                       icon: const Icon(Icons.notifications_none),
@@ -101,9 +103,15 @@ class HomePage extends StatelessWidget {
               const SizedBox(height: 12),
               Consumer<ScanHistoryProvider>(
                 builder: (context, scanHistoryProvider, child) {
-                  final todayScans = _getTodayScans(scanHistoryProvider.scanHistory);
-                  final warningCount = _getWarningCount(scanHistoryProvider.scanHistory);
-                  final avgScore = _getAverageScore(scanHistoryProvider.scanHistory);
+                  final todayScans = _getTodayScans(
+                    scanHistoryProvider.scanHistory,
+                  );
+                  final warningCount = _getWarningCount(
+                    scanHistoryProvider.scanHistory,
+                  );
+                  final avgScore = _getAverageScore(
+                    scanHistoryProvider.scanHistory,
+                  );
 
                   return Container(
                     margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -129,7 +137,8 @@ class HomePage extends StatelessWidget {
                   width: 220,
                   height: 56,
                   child: ElevatedButton.icon(
-                    onPressed: () => Navigator.of(context).pushNamed(AppRoutes.scan),
+                    onPressed:
+                        () => Navigator.of(context).pushNamed(AppRoutes.scan),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _HomeColors.primary,
                       foregroundColor: Colors.white,
@@ -141,7 +150,10 @@ class HomePage extends StatelessWidget {
                     icon: const Icon(Icons.qr_code_scanner),
                     label: const Text(
                       'Quét',
-                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 18,
+                      ),
                     ),
                   ),
                 ),
@@ -187,7 +199,10 @@ class HomePage extends StatelessWidget {
                   children: [
                     const Text(
                       'Lịch sử gần đây',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     GestureDetector(
                       onTap: () => context.navigateToScanHistory(),
@@ -207,7 +222,7 @@ class HomePage extends StatelessWidget {
               Consumer<ScanHistoryProvider>(
                 builder: (context, scanHistoryProvider, child) {
                   final recentScans = scanHistoryProvider.scanHistory;
-                  
+
                   // Hiển thị tối đa 2 sản phẩm gần nhất
                   final displayItems = recentScans.take(2).toList();
 
@@ -230,7 +245,11 @@ class HomePage extends StatelessWidget {
                         ),
                         child: Column(
                           children: [
-                            Icon(Icons.history, size: 48, color: Colors.grey[300]),
+                            Icon(
+                              Icons.history,
+                              size: 48,
+                              color: Colors.grey[300],
+                            ),
                             const SizedBox(height: 12),
                             Text(
                               'Chưa có lịch sử quét',
@@ -246,123 +265,135 @@ class HomePage extends StatelessWidget {
                   }
 
                   return Column(
-                    children: List.generate(
-                      displayItems.length,
-                      (index) {
-                        final item = displayItems[index];
-                        return Padding(
-                          padding: EdgeInsets.only(
-                            left: 16,
-                            right: 16,
-                            bottom: index < displayItems.length - 1 ? 12 : 0,
-                          ),
-                          child: GestureDetector(
-                            onTap: () async {
-                              // Fetch full product with nutriments from Firestore
-                              try {
-                                final product = await context
-                                    .read<ProductRepository>()
-                                    .getProductByBarcode(
-                                      item.barcode,
-                                      forceRefresh: false, // Use cache if available
-                                    );
-                                if (product != null) {
-                                  context.navigateToProductDetail(product);
-                                } else {
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Không thể tải thông tin sản phẩm'),
-                                      ),
-                                    );
-                                  }
-                                }
-                              } catch (e) {
+                    children: List.generate(displayItems.length, (index) {
+                      final item = displayItems[index];
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          left: 16,
+                          right: 16,
+                          bottom: index < displayItems.length - 1 ? 12 : 0,
+                        ),
+                        child: GestureDetector(
+                          onTap: () async {
+                            // Fetch full product with nutriments from Firestore
+                            try {
+                              final product = await context
+                                  .read<ProductRepository>()
+                                  .getProductByBarcode(
+                                    item.barcode,
+                                    forceRefresh:
+                                        false, // Use cache if available
+                                  );
+                              if (product != null) {
+                                context.navigateToProductDetail(product);
+                              } else {
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Lỗi: ${e.toString()}'),
+                                    const SnackBar(
+                                      content: Text(
+                                        'Không thể tải thông tin sản phẩm',
+                                      ),
                                     ),
                                   );
                                 }
                               }
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.all(14),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Color(0x14000000),
-                                    blurRadius: 10,
-                                    offset: Offset(0, 4),
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Lỗi: ${e.toString()}'),
                                   ),
-                                ],
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 56,
-                                    height: 56,
-                                    decoration: BoxDecoration(
-                                      color: _HomeColors.softPrimary,
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: item.productImage != null
-                                        ? ClipRRect(
-                                            borderRadius: BorderRadius.circular(16),
+                                );
+                              }
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0x14000000),
+                                  blurRadius: 10,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 56,
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    color: _HomeColors.softPrimary,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child:
+                                      item.productImage != null
+                                          ? ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
                                             child: Image.network(
                                               item.productImage!,
                                               fit: BoxFit.cover,
-                                              errorBuilder: (context, error, stackTrace) =>
-                                                  const Icon(
-                                                Icons.local_drink,
-                                                color: _HomeColors.primary,
-                                              ),
+                                              errorBuilder:
+                                                  (
+                                                    context,
+                                                    error,
+                                                    stackTrace,
+                                                  ) => const Icon(
+                                                    Icons.local_drink,
+                                                    color: _HomeColors.primary,
+                                                  ),
                                             ),
                                           )
-                                        : const Icon(
+                                          : const Icon(
                                             Icons.local_drink,
                                             color: _HomeColors.primary,
                                           ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        item.productName,
+                                        style: const TextStyle(
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      if (item.brands != null)
                                         Text(
-                                          item.productName,
+                                          item.brands!,
                                           style: const TextStyle(
-                                            fontSize: 17,
-                                            fontWeight: FontWeight.w700,
+                                            fontSize: 12,
+                                            color: Colors.black54,
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                         ),
-                                        const SizedBox(height: 4),
-                                        if (item.brands != null)
-                                          Text(
-                                            item.brands!,
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.black54,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                      ],
-                                    ),
+                                    ],
                                   ),
-                                  Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
-                                ],
-                              ),
+                                ),
+                                Icon(
+                                  Icons.arrow_forward_ios,
+                                  size: 16,
+                                  color: Colors.grey[400],
+                                ),
+                              ],
                             ),
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    }),
                   );
                 },
               ),
@@ -370,39 +401,7 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: Container(
-        height: 66,
-        decoration: const BoxDecoration(
-          color: _HomeColors.surface,
-          border: Border(top: BorderSide(color: _HomeColors.borderLight)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _FooterTab(
-              icon: Icons.home_outlined,
-              label: 'Trang chủ',
-              active: true,
-              onTap: () {},
-            ),
-            _FooterTab(
-              icon: Icons.favorite_border,
-              label: 'Yêu thích',
-              onTap: () => context.navigateToWishlist(),
-            ),
-            _FooterTab(
-              icon: Icons.history,
-              label: 'Lịch sử',
-              onTap: () => context.navigateToScanHistory(),
-            ),
-            _FooterTab(
-              icon: Icons.person_outline,
-              label: 'Hồ sơ',
-              onTap: () => context.navigateToProfile(),
-            ),
-          ],
-        ),
-      ),
+      bottomNavigationBar: const AppBottomNav(current: AppBottomNavItem.home),
     );
   }
 
@@ -535,48 +534,9 @@ class _ShortcutTile extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               subtitle,
-              style: const TextStyle(color: _HomeColors.textMuted, fontSize: 12),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _FooterTab extends StatelessWidget {
-  const _FooterTab({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.active = false,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool active;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = active ? _HomeColors.primary : _HomeColors.iconInactive;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 24, color: color),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(
-                color: color,
-                fontSize: 10,
-                fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+              style: const TextStyle(
+                color: _HomeColors.textMuted,
+                fontSize: 12,
               ),
             ),
           ],
@@ -585,4 +545,3 @@ class _FooterTab extends StatelessWidget {
     );
   }
 }
-
