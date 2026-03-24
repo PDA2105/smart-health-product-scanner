@@ -7,6 +7,10 @@ import '../features/auth/presentation/pages/home_page.dart';
 import '../features/auth/presentation/pages/login_page.dart';
 import '../features/auth/presentation/pages/signup_page.dart';
 import '../features/auth/presentation/pages/start.dart';
+import '../features/health_tracking/presentation/pages/goal_settings_page.dart';
+import '../features/health_tracking/presentation/pages/health_progress_page.dart';
+import '../features/health_tracking/presentation/pages/statistics_page.dart';
+import '../features/health_tracking/presentation/pages/weight_tracking_page.dart';
 import '../features/product/presentation/pages/product_alternatives_page.dart';
 import '../features/product/presentation/pages/product_detail_page.dart';
 import '../features/profile/presentation/pages/profile_edit_page.dart';
@@ -29,6 +33,10 @@ class AppRoutes {
   static const String profileEdit = '/profile-edit';
   static const String scanHistory = '/scan-history';
   static const String wishlist = '/wishlist';
+  static const String weightTracking = '/weight-tracking';
+  static const String healthProgress = '/health-progress';
+  static const String statistics = '/statistics';
+  static const String goalSettings = '/goal-settings';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -64,6 +72,14 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const ScanHistoryPage());
       case wishlist:
         return MaterialPageRoute(builder: (_) => const WishlistPage());
+      case weightTracking:
+        return MaterialPageRoute(builder: (_) => const WeightTrackingPage());
+      case healthProgress:
+        return MaterialPageRoute(builder: (_) => const HealthProgressPage());
+      case statistics:
+        return MaterialPageRoute(builder: (_) => const StatisticsPage());
+      case goalSettings:
+        return MaterialPageRoute(builder: (_) => const GoalSettingsPage());
     // Default to auth gate if route is not found
       default:
         return MaterialPageRoute(builder: (_) => const AuthGate());
@@ -86,4 +102,8 @@ extension Navigation on BuildContext {
   void navigateToProfileEdit() => Navigator.of(this).pushNamed(AppRoutes.profileEdit);
   void navigateToScanHistory() => Navigator.of(this).pushNamed(AppRoutes.scanHistory);
   void navigateToWishlist() => Navigator.of(this).pushNamed(AppRoutes.wishlist);
+  void navigateToWeightTracking() => Navigator.of(this).pushNamed(AppRoutes.weightTracking);
+  void navigateToHealthProgress() => Navigator.of(this).pushNamed(AppRoutes.healthProgress);
+  void navigateToStatistics() => Navigator.of(this).pushNamed(AppRoutes.statistics);
+  void navigateToGoalSettings() => Navigator.of(this).pushNamed(AppRoutes.goalSettings);
 }

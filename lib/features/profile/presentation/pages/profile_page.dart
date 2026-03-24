@@ -68,6 +68,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         phone: profile?.phone ?? 'Chưa cập nhật',
                         location: profile?.location ?? 'Chưa cập nhật',
                       ),
+                      const SizedBox(height: 24),
+                      _buildHealthTrackingSection(context),
                       const SizedBox(height: 22),
                       _buildActionButtons(context),
                     ],
@@ -279,6 +281,60 @@ class _ProfilePageState extends State<ProfilePage> {
       ],
     );
   }
+
+  Widget _buildHealthTrackingSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Theo dõi sức khỏe',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 12),
+        // First row: Weight Tracking + Health Progress
+        Row(
+          children: [
+            Expanded(
+              child: _HealthTrackingButton(
+                icon: Icons.scale,
+                label: 'Cân nặng',
+                onPressed: () => context.navigateToWeightTracking(),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _HealthTrackingButton(
+                icon: Icons.trending_up,
+                label: 'Tiến trình',
+                onPressed: () => context.navigateToHealthProgress(),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        // Second row: Statistics + Goals
+        Row(
+          children: [
+            Expanded(
+              child: _HealthTrackingButton(
+                icon: Icons.bar_chart,
+                label: 'Thống kê',
+                onPressed: () => context.navigateToStatistics(),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _HealthTrackingButton(
+                icon: Icons.flag,
+                label: 'Mục tiêu',
+                onPressed: () => context.navigateToGoalSettings(),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 }
 
 class _SummaryCard extends StatelessWidget {
@@ -355,6 +411,49 @@ class _InfoRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Button widget for health tracking quick access
+class _HealthTrackingButton extends StatelessWidget {
+  const _HealthTrackingButton({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onPressed,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(color: const Color(0xFFE6E6E6)),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 32, color: const Color(0xFF2ECC71)),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
