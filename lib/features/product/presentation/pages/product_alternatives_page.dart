@@ -9,6 +9,10 @@ import 'package:smart_health_product_scanner/features/scan/presentation/provider
 import 'package:smart_health_product_scanner/features/wishlist/presentation/providers/wishlist_provider.dart';
 import 'package:smart_health_product_scanner/routes/app_routes.dart';
 
+const _altPageBg = Color(0xFFF4F4F4);
+const _altPrimary = Color(0xFF2ECC71);
+const _altSoftPrimary = Color(0x5CD0E7CF);
+
 class ProductAlternativesPage extends StatefulWidget {
   const ProductAlternativesPage({
     super.key,
@@ -214,7 +218,7 @@ class _ProductAlternativesPageState extends State<ProductAlternativesPage> {
     final activeGoal = _selectedGoal ?? _inferHealthGoal(profile);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FBF9),
+      backgroundColor: _altPageBg,
       appBar: AppBar(
         title: const Text('Sản phẩm thay thế'),
         backgroundColor: Colors.white,
@@ -705,7 +709,7 @@ class _AlternativeCard extends StatelessWidget {
                     (reason) => Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE9F7EF),
+                        color: _altSoftPrimary,
                         borderRadius: BorderRadius.circular(999),
                         border: Border.all(color: const Color(0xFFB8E4C8)),
                       ),
@@ -714,7 +718,7 @@ class _AlternativeCard extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF1E7D42),
+                          color: _altPrimary,
                         ),
                       ),
                     ),

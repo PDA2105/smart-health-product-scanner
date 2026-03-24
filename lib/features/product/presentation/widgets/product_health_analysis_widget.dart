@@ -6,10 +6,8 @@ import 'package:smart_health_product_scanner/features/product/presentation/provi
 
 /// Widget hiển thị kết quả phân tích sức khỏe sản phẩm
 class ProductHealthAnalysisWidget extends StatefulWidget {
-  const ProductHealthAnalysisWidget({
-    Key? key,
-    required this.product,
-  }) : super(key: key);
+  const ProductHealthAnalysisWidget({Key? key, required this.product})
+    : super(key: key);
 
   final ProductModel product;
 
@@ -20,6 +18,12 @@ class ProductHealthAnalysisWidget extends StatefulWidget {
 
 class _ProductHealthAnalysisWidgetState
     extends State<ProductHealthAnalysisWidget> {
+  static const _primary = Color(0xFF2ECC71);
+  static const _softPrimary = Color(0x5CD0E7CF);
+  static const _textPrimary = Color(0xFF333333);
+  static const _warning = Color(0xFFFF4D4F);
+  static const _success = Color(0xFF27AE60);
+
   // Analysis is triggered from ProductDetailPage._triggerAnalysis()
   // to avoid duplicate calls - called only once per product
 
@@ -28,11 +32,20 @@ class _ProductHealthAnalysisWidgetState
     return Consumer<HealthAnalysisProvider>(
       builder: (context, analysisProvider, _) {
         if (analysisProvider.isLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(_primary),
+            ),
+          );
         }
 
         if (analysisProvider.error != null) {
-          return Center(child: Text(analysisProvider.error!));
+          return Center(
+            child: Text(
+              analysisProvider.error!,
+              style: const TextStyle(color: _warning),
+            ),
+          );
         }
 
         final result = analysisProvider.analysisResult;
@@ -59,7 +72,7 @@ class _ProductHealthAnalysisWidgetState
                   _buildWarningSection(
                     '⚠️ Cảnh báo dị ứng',
                     result.allergieWarnings,
-                    Colors.red,
+                    _warning,
                   ),
                 if (result.allergieWarnings.isNotEmpty)
                   const SizedBox(height: 16),
@@ -69,26 +82,23 @@ class _ProductHealthAnalysisWidgetState
                   _buildWarningSection(
                     '🍽️ Khác với chế độ ăn',
                     result.dietWarnings,
-                    Colors.orange,
+                    const Color(0xFFFF8A34),
                   ),
-                if (result.dietWarnings.isNotEmpty)
-                  const SizedBox(height: 16),
+                if (result.dietWarnings.isNotEmpty) const SizedBox(height: 16),
 
                 // General Warnings
                 if (result.warnings.isNotEmpty)
                   _buildWarningSection(
                     '⚠️ Cảnh báo chung',
                     result.warnings,
-                    Colors.amber,
+                    _warning,
                   ),
-                if (result.warnings.isNotEmpty)
-                  const SizedBox(height: 16),
+                if (result.warnings.isNotEmpty) const SizedBox(height: 16),
 
                 // Benefits
                 if (result.benefits.isNotEmpty)
                   _buildBenefitSection(result.benefits),
-                if (result.benefits.isNotEmpty)
-                  const SizedBox(height: 16),
+                if (result.benefits.isNotEmpty) const SizedBox(height: 16),
 
                 // Nutrition Details
                 _buildNutritionDetailsSection(result.nutritionAnalysis),
@@ -108,11 +118,7 @@ class _ProductHealthAnalysisWidgetState
       elevation: 4,
       child: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [backgroundColor, backgroundColor.withOpacity(0.7)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: backgroundColor,
           borderRadius: BorderRadius.circular(12),
         ),
         padding: const EdgeInsets.all(20),
@@ -138,8 +144,7 @@ class _ProductHealthAnalysisWidgetState
                     value: result.score / 10,
                     strokeWidth: 8,
                     backgroundColor: Colors.white.withOpacity(0.3),
-                    valueColor:
-                    AlwaysStoppedAnimation<Color>(Colors.white),
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
                 ),
                 Column(
@@ -169,10 +174,7 @@ class _ProductHealthAnalysisWidgetState
             Text(
               _getScoreDescription(result.score),
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 13,
-                color: Colors.white,
-              ),
+              style: const TextStyle(fontSize: 13, color: Colors.white),
             ),
           ],
         ),
@@ -182,16 +184,14 @@ class _ProductHealthAnalysisWidgetState
 
   /// Xây dựng Warning Section
   Widget _buildWarningSection(
-      String title,
-      List<String> warnings,
-      Color color,
-      ) {
+    String title,
+    List<String> warnings,
+    Color color,
+  ) {
     return Card(
       child: Container(
         decoration: BoxDecoration(
-          border: Border(
-            left: BorderSide(color: color, width: 4),
-          ),
+          border: Border(left: BorderSide(color: color, width: 4)),
           borderRadius: BorderRadius.circular(8),
           color: color.withOpacity(0.05),
         ),
@@ -209,12 +209,9 @@ class _ProductHealthAnalysisWidgetState
             ),
             const SizedBox(height: 8),
             ...warnings.map(
-                  (warning) => Padding(
+              (warning) => Padding(
                 padding: const EdgeInsets.only(bottom: 6),
-                child: Text(
-                  warning,
-                  style: const TextStyle(fontSize: 13),
-                ),
+                child: Text(warning, style: const TextStyle(fontSize: 13)),
               ),
             ),
           ],
@@ -228,11 +225,9 @@ class _ProductHealthAnalysisWidgetState
     return Card(
       child: Container(
         decoration: BoxDecoration(
-          border: Border(
-            left: const BorderSide(color: Colors.green, width: 4),
-          ),
+          border: Border(left: const BorderSide(color: _success, width: 4)),
           borderRadius: BorderRadius.circular(8),
-          color: Colors.green.withOpacity(0.05),
+          color: _softPrimary,
         ),
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -243,17 +238,14 @@ class _ProductHealthAnalysisWidgetState
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: Colors.green,
+                color: _success,
               ),
             ),
             const SizedBox(height: 8),
             ...benefits.map(
-                  (benefit) => Padding(
+              (benefit) => Padding(
                 padding: const EdgeInsets.only(bottom: 6),
-                child: Text(
-                  benefit,
-                  style: const TextStyle(fontSize: 13),
-                ),
+                child: Text(benefit, style: const TextStyle(fontSize: 13)),
               ),
             ),
           ],
@@ -350,11 +342,7 @@ class _ProductHealthAnalysisWidgetState
   }
 
   /// Xây dựng Nutrition Row
-  Widget _buildNutritionRow(
-      String label,
-      String value,
-      IconData icon,
-      ) {
+  Widget _buildNutritionRow(String label, String value, IconData icon) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -362,15 +350,12 @@ class _ProductHealthAnalysisWidgetState
         children: [
           Row(
             children: [
-              Icon(icon, size: 20, color: Colors.blue),
+              Icon(icon, size: 20, color: _primary),
               const SizedBox(width: 12),
               Text(label),
             ],
           ),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -388,16 +373,10 @@ class _ProductHealthAnalysisWidgetState
       ),
       child: Column(
         children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 12),
-          ),
+          Text(label, style: const TextStyle(fontSize: 12)),
           Text(
             value,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: scoreColor,
-            ),
+            style: TextStyle(fontWeight: FontWeight.bold, color: scoreColor),
           ),
         ],
       ),
@@ -406,10 +385,10 @@ class _ProductHealthAnalysisWidgetState
 
   /// Lấy màu dựa trên điểm số
   Color _getScoreColor(double score) {
-    if (score >= 8) return Colors.green;
-    if (score >= 6) return Colors.blue;
-    if (score >= 4) return Colors.orange;
-    return Colors.red;
+    if (score >= 8) return _primary;
+    if (score >= 6) return _success;
+    if (score >= 4) return const Color(0xFFFF8A34);
+    return _warning;
   }
 
   /// Lấy mô tả điểm số
@@ -428,11 +407,11 @@ class _ProductHealthAnalysisWidgetState
   /// Lấy màu cho score tag
   Color _getScoreTagColor(String score) {
     final scoreLower = score.toLowerCase();
-    if (scoreLower.contains('a')) return Colors.green;
-    if (scoreLower.contains('b')) return Colors.lightGreen;
+    if (scoreLower.contains('a')) return _primary;
+    if (scoreLower.contains('b')) return _success;
     if (scoreLower.contains('c')) return Colors.orange;
     if (scoreLower.contains('d')) return Colors.deepOrange;
-    if (scoreLower.contains('e')) return Colors.red;
+    if (scoreLower.contains('e')) return _warning;
     return Colors.grey;
   }
 
@@ -442,8 +421,8 @@ class _ProductHealthAnalysisWidgetState
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.blue.shade300, width: 2),
-          color: Colors.blue.withOpacity(0.05),
+          border: Border.all(color: _primary, width: 1.5),
+          color: _softPrimary,
         ),
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -451,14 +430,14 @@ class _ProductHealthAnalysisWidgetState
           children: [
             Row(
               children: [
-                const Icon(Icons.auto_awesome, color: Colors.blue, size: 20),
+                const Icon(Icons.auto_awesome, color: _primary, size: 20),
                 const SizedBox(width: 8),
                 const Text(
                   '🤖 Phân tích AI (Gemini)',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue,
+                    color: _primary,
                   ),
                 ),
               ],
@@ -469,7 +448,7 @@ class _ProductHealthAnalysisWidgetState
               style: const TextStyle(
                 fontSize: 13,
                 height: 1.5,
-                color: Colors.black87,
+                color: _textPrimary,
               ),
             ),
           ],

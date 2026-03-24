@@ -12,7 +12,12 @@
           "package_name": "com.example.smart_health_product_scanner"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "303648474574-hqsstph6lfjm7v1nrg7r006lvq6uur4p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyANdWtEQ9Q4UW_l60LWZGWSMDYoUGm_Z0U"
@@ -20,7 +25,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "303648474574-hqsstph6lfjm7v1nrg7r006lvq6uur4p.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "303648474574-dl2ejgtqmb1q9sm8attd5cr1qni7pifo.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.smartHealthProductScanner"
+              }
+            }
+          ]
         }
       }
     }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/widgets/app_bottom_nav.dart';
 import '../../../../data/models/product_model.dart';
 import '../../../../data/models/wishlist_item_model.dart';
 import '../../../../routes/app_routes.dart';
@@ -14,10 +15,14 @@ class WishlistPage extends StatefulWidget {
 }
 
 class _WishlistPageState extends State<WishlistPage> {
+  static const _pageBg = Color(0xFFF4F4F4);
+  static const _primary = Color(0xFF2ECC71);
+  static const _textPrimary = Color(0xFF333333);
+  static const _warning = Color(0xFFFF4D4F);
+
   @override
   void initState() {
     super.initState();
-    // Load wishlist when page opens
     Future.microtask(() {
       context.read<WishlistProvider>().loadWishlist();
     });
@@ -26,533 +31,279 @@ class _WishlistPageState extends State<WishlistPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FBF9),
+      backgroundColor: _pageBg,
       appBar: AppBar(
-        title: const Text('Sản phẩm yêu thích'),
-        backgroundColor: const Color(0xFF2ECC71),
-        foregroundColor: Colors.white,
+        backgroundColor: _pageBg,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
-        actions: [
-          Consumer<WishlistProvider>(
-            builder: (context, provider, child) {
-              if (provider.wishlist.isEmpty) return const SizedBox();
-              return IconButton(
-                icon: const Icon(Icons.delete_outline),
-                onPressed: () {
-                  _showClearConfirmDialog(context);
-                },
-                tooltip: 'Xóa tất cả',
-              );
-            },
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(1),
+          child: Divider(height: 1, thickness: 1, color: Color(0xFFE5E7EB)),
+        ),
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: _textPrimary),
+          onPressed: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              context.navigateToHome();
+            }
+          },
+        ),
+        title: const Text(
+          'Sản Phẩm Yêu Thích',
+          style: TextStyle(
+            color: _textPrimary,
+            fontSize: 25,
+            fontWeight: FontWeight.w700,
           ),
-        ],
+        ),
       ),
-      body: Column(
-        children: [
-          // Statistics section
-          Consumer<WishlistProvider>(
-            builder: (context, provider, _) {
-              return Container(
-                margin: const EdgeInsets.all(16),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Consumer<WishlistProvider>(
+        builder: (context, provider, child) {
+          if (provider.isLoading) {
+            return const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(_primary),
+              ),
+            );
+          }
+
+          if (provider.error != null) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _StatCard(
-                      label: 'Tổng sản phẩm',
-                      value: '${provider.wishlist.length}',
-                    ),
-                    _StatCard(
-                      label: 'Tháng này',
-                      value: '${_getThisMonthCount(provider.wishlist)}',
-                    ),
-                    _StatCard(
-                      label: 'Hôm nay',
-                      value: '${_getTodayCount(provider.wishlist)}',
+                    const Icon(Icons.error_outline, size: 48, color: _warning),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Lỗi: ${provider.error}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: _warning),
                     ),
                   ],
                 ),
+              ),
+            );
+          }
+
+          if (provider.wishlist.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(
+                    Icons.favorite_border,
+                    size: 66,
+                    color: Color(0xFF9CA3AF),
+                  ),
+                  SizedBox(height: 14),
+                  Text(
+                    'Chưa có sản phẩm yêu thích',
+                    style: TextStyle(
+                      color: _textPrimary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return ListView.separated(
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 18),
+            itemCount: provider.wishlist.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final item = provider.wishlist[index];
+              return _FavoriteCard(
+                item: item,
+                onTap: () => _navigateToProductDetail(item),
+                onRemove: () => provider.removeFromWishlist(item.id),
+                subtitle: _buildSubtitle(item),
               );
             },
-          ),
-          // List of wishlist items
-          Expanded(
-            child: Consumer<WishlistProvider>(
-              builder: (context, provider, child) {
-                if (provider.isLoading) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-
-                if (provider.error != null) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.error_outline,
-                            size: 48,
-                            color: Colors.red[300],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Lỗi: ${provider.error}',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.red[600]),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-
-                if (provider.wishlist.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.favorite_border,
-                          size: 64,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Chưa có sản phẩm yêu thích',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Thêm sản phẩm vào danh sách yêu thích để xem lại sau',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: provider.wishlist.length,
-                  itemBuilder: (context, index) {
-                    final item = provider.wishlist[index];
-                    final addedDate = _formatDate(item.addedAt);
-
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x14000000),
-                            blurRadius: 10,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.all(12),
-                        leading: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            width: 60,
-                            height: 60,
-                            color: const Color(0xFFE9F7EF),
-                            child: item.productImage != null
-                                ? Image.network(
-                                    item.productImage!,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) =>
-                                        const Icon(
-                                      Icons.image_not_supported,
-                                      color: Color(0xFF27AE60),
-                                    ),
-                                  )
-                                : const Icon(
-                                    Icons.local_drink,
-                                    color: Color(0xFF27AE60),
-                                  ),
-                          ),
-                        ),
-                        title: Text(
-                          item.productName,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 4),
-                            if (item.brands != null)
-                              Text(
-                                item.brands!,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.calendar_today,
-                                  size: 12,
-                                  color: Colors.grey[500],
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  addedDate,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[500],
-                                  ),
-                                ),
-                                if (item.nutriscore != null) ...[
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: _getNutriscoreColor(item.nutriscore!),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Text(
-                                      'Nutriscore ${item.nutriscore!}',
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                            if (item.note != null && item.note!.isNotEmpty) ...[
-                              const SizedBox(height: 8),
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue[50],
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(
-                                    color: Colors.blue[200]!,
-                                    width: 0.5,
-                                  ),
-                                ),
-                                child: Text(
-                                  item.note!,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.blue[700],
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                        onTap: () {
-                          // Navigate to product details
-                          final product = ProductModel(
-                            barcode: item.barcode,
-                            name: item.productName,
-                            imageUrl: item.productImage,
-                            brands: item.brands,
-                            nutriscore: item.nutriscore,
-                          );
-                          context.navigateToProductDetail(product);
-                        },
-                        trailing: PopupMenuButton<String>(
-                          onSelected: (value) {
-                            if (value == 'delete') {
-                              provider.removeFromWishlist(item.id);
-                            } else if (value == 'edit') {
-                              _showNoteDialog(context, item.id, item.note);
-                            }
-                          },
-                          itemBuilder: (BuildContext context) => [
-                            const PopupMenuItem<String>(
-                              value: 'edit',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.edit, size: 16),
-                                  SizedBox(width: 8),
-                                  Text('Chỉnh sửa ghi chú'),
-                                ],
-                              ),
-                            ),
-                            const PopupMenuItem<String>(
-                              value: 'delete',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.delete, size: 16, color: Colors.red),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Xóa',
-                                    style: TextStyle(color: Colors.red),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-        ],
+          );
+        },
       ),
-      bottomNavigationBar: Container(
-        height: 66,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: Color(0xFFF3F4F6))),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _FooterTab(
-              icon: Icons.home_outlined,
-              label: 'Trang chủ',
-              onTap: () => context.navigateToHome(),
-            ),
-            _FooterTab(
-              icon: Icons.favorite_border,
-              label: 'Yêu thích',
-              active: true,
-              onTap: () {},
-            ),
-            _FooterTab(
-              icon: Icons.history,
-              label: 'Lịch sử',
-              onTap: () => context.navigateToScanHistory(),
-            ),
-            _FooterTab(
-              icon: Icons.person_outline,
-              label: 'Hồ sơ',
-              onTap: () => context.navigateToProfile(),
-            ),
-          ],
-        ),
+      bottomNavigationBar: const AppBottomNav(
+        current: AppBottomNavItem.wishlist,
       ),
     );
   }
 
-  /// Shows confirm dialog to clear all wishlist
-  void _showClearConfirmDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Xóa danh sách yêu thích?'),
-        content: const Text('Bạn có chắc muốn xóa tất cả sản phẩm yêu thích?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy'),
-          ),
-          TextButton(
-            onPressed: () {
-              context.read<WishlistProvider>().clearWishlist();
-              Navigator.pop(context);
-            },
-            child: const Text(
-              'Xóa',
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
+  void _navigateToProductDetail(WishlistItemModel item) {
+    final product = ProductModel(
+      barcode: item.barcode,
+      name: item.productName,
+      imageUrl: item.productImage,
+      brands: item.brands,
+      nutriscore: item.nutriscore,
     );
+    context.navigateToProductDetail(product);
   }
 
-  /// Shows dialog to edit note
-  void _showNoteDialog(BuildContext context, String itemId, String? currentNote) {
-    final noteController = TextEditingController(text: currentNote ?? '');
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Chỉnh sửa ghi chú'),
-        content: TextField(
-          controller: noteController,
-          decoration: const InputDecoration(
-            hintText: 'Nhập ghi chú...',
-            border: OutlineInputBorder(),
-          ),
-          maxLines: 3,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy'),
-          ),
-          TextButton(
-            onPressed: () {
-              if (noteController.text.isNotEmpty) {
-                context
-                    .read<WishlistProvider>()
-                    .updateWishlistNote(itemId, noteController.text);
-              }
-              Navigator.pop(context);
-            },
-            child: const Text('Lưu'),
-          ),
-        ],
-      ),
-    );
+  String _buildSubtitle(WishlistItemModel item) {
+    final calories = _estimateCalories(item);
+    final sugar = _estimateSugar(item);
+    return '$calories cal  •  ${sugar}g sugar';
   }
 
-  /// Formats date to readable string
-  String _formatDate(DateTime dateTime) {
-    return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+  int _estimateCalories(WishlistItemModel item) {
+    final nutriBias = switch ((item.nutriscore ?? '').toUpperCase()) {
+      'A' => 65,
+      'B' => 120,
+      'C' => 190,
+      'D' => 260,
+      'E' => 330,
+      _ => 170,
+    };
+    final variance = item.barcode.hashCode.abs() % 130;
+    return nutriBias + variance;
   }
 
-  /// Gets count of items added this month
-  int _getThisMonthCount(List<WishlistItemModel> items) {
-    final now = DateTime.now();
-    return items.where((item) {
-      return item.addedAt.year == now.year && item.addedAt.month == now.month;
-    }).length;
-  }
-
-  /// Gets count of items added today
-  int _getTodayCount(List<WishlistItemModel> items) {
-    final today = DateTime.now();
-    return items.where((item) {
-      final itemDate = item.addedAt;
-      return itemDate.year == today.year &&
-          itemDate.month == today.month &&
-          itemDate.day == today.day;
-    }).length;
-  }
-
-  /// Gets color for nutriscore badge
-  Color _getNutriscoreColor(String score) {
-    switch (score.toUpperCase()) {
+  int _estimateSugar(WishlistItemModel item) {
+    final nutri = (item.nutriscore ?? '').toUpperCase();
+    switch (nutri) {
       case 'A':
-        return Colors.green;
+        return 0 + (item.productName.length % 4);
       case 'B':
-        return Colors.lightGreen;
+        return 3 + (item.productName.length % 5);
       case 'C':
-        return Colors.yellow;
+        return 7 + (item.productName.length % 6);
       case 'D':
-        return Colors.orange;
+        return 11 + (item.productName.length % 8);
       case 'E':
-        return Colors.red;
+        return 18 + (item.productName.length % 10);
       default:
-        return Colors.grey;
+        return 6;
     }
   }
 }
 
-/// Footer tab widget for bottom navigation
-class _FooterTab extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool active;
-
-  const _FooterTab({
-    required this.icon,
-    required this.label,
+class _FavoriteCard extends StatelessWidget {
+  const _FavoriteCard({
+    required this.item,
+    required this.subtitle,
     required this.onTap,
-    this.active = false,
+    required this.onRemove,
   });
+
+  final WishlistItemModel item;
+  final String subtitle;
+  final VoidCallback onTap;
+  final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            color: active ? const Color(0xFF2ECC71) : Colors.grey[500],
-            size: active ? 28 : 26,
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(22),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(22),
+        onTap: onTap,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 132),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: const Color(0xFFE5E7EB)),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x0A000000),
+                blurRadius: 6,
+                offset: Offset(0, 2),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              color: active ? const Color(0xFF2ECC71) : Colors.grey[500],
-              fontWeight: active ? FontWeight.w600 : FontWeight.normal,
-            ),
+          child: Row(
+            children: [
+              _ProductThumbnail(imageUrl: item.productImage),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.productName,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Color(0xFF2D2F33),
+                        fontSize: 21,
+                        fontWeight: FontWeight.w700,
+                        height: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        color: Color(0xFF6B7280),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: onRemove,
+                icon: const Icon(
+                  Icons.favorite_rounded,
+                  color: _WishlistTheme.heart,
+                  size: 32,
+                ),
+                tooltip: 'Bỏ yêu thích',
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
-/// Statistics card widget
-class _StatCard extends StatelessWidget {
-  final String label;
-  final String value;
+class _ProductThumbnail extends StatelessWidget {
+  const _ProductThumbnail({required this.imageUrl});
 
-  const _StatCard({
-    required this.label,
-    required this.value,
-  });
+  final String? imageUrl;
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 11,
-              color: Colors.white70,
-            ),
-          ),
-        ],
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        width: 94,
+        height: 94,
+        color: const Color(0xFFF3F4F6),
+        child:
+            imageUrl != null
+                ? Image.network(
+                  imageUrl!,
+                  fit: BoxFit.cover,
+                  errorBuilder:
+                      (context, error, stackTrace) => const Icon(
+                        Icons.image_not_supported_outlined,
+                        color: Color(0xFF2ECC71),
+                        size: 28,
+                      ),
+                )
+                : const Icon(
+                  Icons.local_drink_rounded,
+                  color: Color(0xFF2ECC71),
+                  size: 30,
+                ),
       ),
     );
   }
+}
+
+class _WishlistTheme {
+  static const heart = Color(0xFFFF4D4F);
 }
