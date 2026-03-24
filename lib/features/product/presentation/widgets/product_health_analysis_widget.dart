@@ -108,11 +108,7 @@ class _ProductHealthAnalysisWidgetState
       elevation: 4,
       child: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [backgroundColor, backgroundColor.withOpacity(0.7)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: backgroundColor,
           borderRadius: BorderRadius.circular(12),
         ),
         padding: const EdgeInsets.all(20),

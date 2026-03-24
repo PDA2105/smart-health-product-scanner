@@ -14,6 +14,10 @@ class WishlistPage extends StatefulWidget {
 }
 
 class _WishlistPageState extends State<WishlistPage> {
+  static const _pageBg = Color(0xFFF4F4F4);
+  static const _primary = Color(0xFF2ECC71);
+  static const _softPrimary = Color(0x5CD0E7CF);
+
   @override
   void initState() {
     super.initState();
@@ -26,7 +30,7 @@ class _WishlistPageState extends State<WishlistPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FBF9),
+      backgroundColor: _pageBg,
       appBar: AppBar(
         title: const Text('Sản phẩm yêu thích'),
         backgroundColor: const Color(0xFF2ECC71),
@@ -56,11 +60,7 @@ class _WishlistPageState extends State<WishlistPage> {
                 margin: const EdgeInsets.all(16),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: _primary,
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: Row(
@@ -175,7 +175,7 @@ class _WishlistPageState extends State<WishlistPage> {
                           child: Container(
                             width: 60,
                             height: 60,
-                            color: const Color(0xFFE9F7EF),
+                            color: _softPrimary,
                             child: item.productImage != null
                                 ? Image.network(
                                     item.productImage!,
@@ -183,12 +183,12 @@ class _WishlistPageState extends State<WishlistPage> {
                                     errorBuilder: (context, error, stackTrace) =>
                                         const Icon(
                                       Icons.image_not_supported,
-                                      color: Color(0xFF27AE60),
+                                      color: _primary,
                                     ),
                                   )
                                 : const Icon(
                                     Icons.local_drink,
-                                    color: Color(0xFF27AE60),
+                                    color: _primary,
                                   ),
                           ),
                         ),

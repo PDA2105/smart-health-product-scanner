@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -33,10 +30,7 @@ class DefaultFirebaseOptions {
           'you can reconfigure this by running the FlutterFire CLI again.',
         );
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -63,7 +57,26 @@ class DefaultFirebaseOptions {
     messagingSenderId: '303648474574',
     projectId: 'smart-health-product-sca-a1389',
     storageBucket: 'smart-health-product-sca-a1389.firebasestorage.app',
+    iosClientId: '303648474574-dl2ejgtqmb1q9sm8attd5cr1qni7pifo.apps.googleusercontent.com',
     iosBundleId: 'com.example.smartHealthProductScanner',
+  );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyDo5iSajDo3MPmz5xlbkCqxD0G9aEEgWJs',
+    appId: '1:303648474574:web:ec6f51696ec654ab29579f',
+    messagingSenderId: '303648474574',
+    projectId: 'smart-health-product-sca-a1389',
+    authDomain: 'smart-health-product-sca-a1389.firebaseapp.com',
+    storageBucket: 'smart-health-product-sca-a1389.firebasestorage.app',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyDo5iSajDo3MPmz5xlbkCqxD0G9aEEgWJs',
+    appId: '1:303648474574:web:14ce85f6efb5b44b29579f',
+    messagingSenderId: '303648474574',
+    projectId: 'smart-health-product-sca-a1389',
+    authDomain: 'smart-health-product-sca-a1389.firebaseapp.com',
+    storageBucket: 'smart-health-product-sca-a1389.firebasestorage.app',
   );
 
 }

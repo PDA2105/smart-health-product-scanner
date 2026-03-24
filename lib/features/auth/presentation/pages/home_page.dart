@@ -6,6 +6,16 @@ import '../../../../features/scan/presentation/providers/scan_history_provider.d
 import '../../../../routes/app_routes.dart';
 import '../providers/auth_provider.dart';
 
+class _HomeColors {
+  static const pageBackground = Color(0xFFF4F4F4);
+  static const surface = Colors.white;
+  static const primary = Color(0xFF2ECC71);
+  static const softPrimary = Color(0x5CD0E7CF);
+  static const textMuted = Color(0xFF767A77);
+  static const borderLight = Color(0xFFE6E6E6);
+  static const iconInactive = Color(0xFF9CA3AF);
+}
+
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
@@ -17,10 +27,10 @@ class HomePage extends StatelessWidget {
         (displayName != null && displayName.isNotEmpty) ? displayName : 'Bạn';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FBF9),
+      backgroundColor: _HomeColors.pageBackground,
       appBar: AppBar(
         toolbarHeight: 0,
-        backgroundColor: const Color(0xFF2ECC71),
+        backgroundColor: _HomeColors.primary,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -31,7 +41,7 @@ class HomePage extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
                 decoration: const BoxDecoration(
-                  color: Color(0xCC2ECC71),
+                  color: _HomeColors.softPrimary,
                   borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(24),
                     bottomRight: Radius.circular(24),
@@ -41,7 +51,7 @@ class HomePage extends StatelessWidget {
                   children: [
                     const CircleAvatar(
                       radius: 30,
-                      backgroundColor: Color(0xFFD9D9D9),
+                      backgroundColor: _HomeColors.softPrimary,
                       child: Icon(Icons.person, size: 32, color: Colors.black54),
                     ),
                     const SizedBox(width: 12),
@@ -62,7 +72,7 @@ class HomePage extends StatelessWidget {
                               user!.email!,
                               style: const TextStyle(
                                 fontSize: 14,
-                                color: Colors.black87,
+                                color: _HomeColors.textMuted,
                               ),
                             ),
                         ],
@@ -99,11 +109,7 @@ class HomePage extends StatelessWidget {
                     margin: const EdgeInsets.symmetric(horizontal: 16),
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+                      color: _HomeColors.primary,
                       borderRadius: BorderRadius.circular(18),
                     ),
                     child: Row(
@@ -125,7 +131,7 @@ class HomePage extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: () => Navigator.of(context).pushNamed(AppRoutes.scan),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2ECC71),
+                      backgroundColor: _HomeColors.primary,
                       foregroundColor: Colors.white,
                       elevation: 4,
                       shape: RoundedRectangleBorder(
@@ -189,7 +195,7 @@ class HomePage extends StatelessWidget {
                         'Xem tất cả',
                         style: TextStyle(
                           fontSize: 16,
-                          color: Color(0xFF2ECC71),
+                          color: _HomeColors.primary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -212,7 +218,7 @@ class HomePage extends StatelessWidget {
                         width: double.infinity,
                         padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: _HomeColors.surface,
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: const [
                             BoxShadow(
@@ -300,7 +306,7 @@ class HomePage extends StatelessWidget {
                                     width: 56,
                                     height: 56,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFE9F7EF),
+                                      color: _HomeColors.softPrimary,
                                       borderRadius: BorderRadius.circular(16),
                                     ),
                                     child: item.productImage != null
@@ -312,13 +318,13 @@ class HomePage extends StatelessWidget {
                                               errorBuilder: (context, error, stackTrace) =>
                                                   const Icon(
                                                 Icons.local_drink,
-                                                color: Color(0xFF27AE60),
+                                                color: _HomeColors.primary,
                                               ),
                                             ),
                                           )
                                         : const Icon(
                                             Icons.local_drink,
-                                            color: Color(0xFF27AE60),
+                                            color: _HomeColors.primary,
                                           ),
                                   ),
                                   const SizedBox(width: 12),
@@ -367,8 +373,8 @@ class HomePage extends StatelessWidget {
       bottomNavigationBar: Container(
         height: 66,
         decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: Color(0xFFF3F4F6))),
+          color: _HomeColors.surface,
+          border: Border(top: BorderSide(color: _HomeColors.borderLight)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -507,7 +513,7 @@ class _ShortcutTile extends StatelessWidget {
       child: Ink(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: _HomeColors.surface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: const [
             BoxShadow(
@@ -520,7 +526,7 @@ class _ShortcutTile extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: const Color(0xFF2ECC71), size: 28),
+            Icon(icon, color: _HomeColors.primary, size: 28),
             const SizedBox(height: 10),
             Text(
               title,
@@ -529,7 +535,7 @@ class _ShortcutTile extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               subtitle,
-              style: const TextStyle(color: Colors.black54, fontSize: 12),
+              style: const TextStyle(color: _HomeColors.textMuted, fontSize: 12),
             ),
           ],
         ),
@@ -553,7 +559,7 @@ class _FooterTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = active ? const Color(0xFF2ECC71) : const Color(0xFF9CA3AF);
+    final color = active ? _HomeColors.primary : _HomeColors.iconInactive;
 
     return InkWell(
       onTap: onTap,
