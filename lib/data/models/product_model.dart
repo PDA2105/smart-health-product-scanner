@@ -10,6 +10,7 @@ class ProductModel {
     this.name,
     this.imageUrl,
     this.brands,
+    this.categories,
     this.quantity,
     this.nutriscore,
     this.ecoscore,
@@ -22,6 +23,7 @@ class ProductModel {
   final String? name;
   final String? imageUrl;
   final String? brands;
+  final List<String>? categories;
   final String? quantity;
   final String? nutriscore;
   final String? ecoscore;
@@ -52,6 +54,9 @@ class ProductModel {
       name: map['name'] as String?,
       imageUrl: map['imageUrl'] as String?,
       brands: map['brands'] as String?,
+      categories: (map['categories'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
       quantity: map['quantity'] as String?,
       nutriscore: map['nutriscore'] as String?,
       ecoscore: map['ecoscore'] as String?,
@@ -88,6 +93,7 @@ class ProductModel {
       name: product.productName,
       imageUrl: product.imageFrontUrl,
       brands: product.brands,
+      categories: product.categoriesTags,
       quantity: product.quantity,
       nutriscore: product.nutriscore,
       ecoscore: product.ecoscoreData?.grade,
@@ -104,6 +110,7 @@ class ProductModel {
       'name': name,
       'imageUrl': imageUrl,
       'brands': brands,
+      'categories': categories,
       'quantity': quantity,
       'nutriscore': nutriscore,
       'ecoscore': ecoscore,

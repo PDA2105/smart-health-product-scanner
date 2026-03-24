@@ -165,6 +165,129 @@ class ProductRepository {
     }
   }
 
+  /// Searches for products by brand.
+  Future<List<ProductModel>> searchProductsByBrand(
+    String brand, {
+    int limit = 20,
+  }) async {
+    try {
+      AppLogger.debug('[ProductRepository] Searching products by brand: $brand');
+      
+      final snapshot = await _productsCollection
+          .where('brands', isEqualTo: brand)
+          .limit(limit)
+          .get();
+      
+      final products = snapshot.docs.map((doc) => doc.data()).toList();
+      AppLogger.debug('[ProductRepository] Found ${products.length} products for brand: $brand');
+      return products;
+    } catch (e) {
+      AppLogger.error(
+        '[ProductRepository] Error searching products by brand: $brand',
+        error: e,
+      );
+      return [];
+    }
+  }
+
+  /// Searches for products by category using array-contains query.
+  Future<List<ProductModel>> searchProductsByCategory(
+    String category, {
+    int limit = 20,
+  }) async {
+    try {
+      AppLogger.debug('[ProductRepository] Searching products by category: $category');
+      
+      final snapshot = await _productsCollection
+          .where('categories', arrayContains: category)
+          .limit(limit)
+          .get();
+      
+      final products = snapshot.docs.map((doc) => doc.data()).toList();
+      AppLogger.debug('[ProductRepository] Found ${products.length} products for category: $category');
+      return products;
+    } catch (e) {
+      AppLogger.error(
+        '[ProductRepository] Error searching products by category: $category',
+        error: e,
+      );
+      return [];
+    }
+  }
+
+  /// Gets similar products by brand and/or category.
+  ///
+  /// Searches for products with the same brand first, then supplements with products
+  /// from the same category if needed to reach the limit.
+  Future<List<ProductModel>> getSimilarProducts(
+    ProductModel product, {
+    int limit = 15,
+  }) async {
+    try {
+      AppLogger.debug(
+        '[ProductRepository] Getting similar products for: ${product.name} (brand: ${product.brands}, categories: ${product.categories})',
+      );
+
+      final similarProducts = <ProductModel>[];
+      final seenBarcodes = <String>{product.barcode};
+
+      // 1. Search by brand first
+      if ((product.brands ?? '').isNotEmpty) {
+        try {
+          final brandProducts = await searchProductsByBrand(
+            product.brands!,
+            limit: limit,
+          );
+          
+          for (var p in brandProducts) {
+            if (!seenBarcodes.contains(p.barcode)) {
+              similarProducts.add(p);
+              seenBarcodes.add(p.barcode);
+              if (similarProducts.length >= limit) break;
+            }
+          }
+        } catch (e) {
+          AppLogger.warn(
+            '[ProductRepository] Error searching by brand: $e',
+          );
+        }
+      }
+
+      // 2. If not enough results, search by first category
+      if (similarProducts.length < limit && (product.categories?.isNotEmpty ?? false)) {
+        try {
+          final categoryProducts = await searchProductsByCategory(
+            product.categories!.first,
+            limit: limit * 2,
+          );
+          
+          for (var p in categoryProducts) {
+            if (!seenBarcodes.contains(p.barcode)) {
+              similarProducts.add(p);
+              seenBarcodes.add(p.barcode);
+              if (similarProducts.length >= limit) break;
+            }
+          }
+        } catch (e) {
+          AppLogger.warn(
+            '[ProductRepository] Error searching by category: $e',
+          );
+        }
+      }
+
+      AppLogger.debug(
+        '[ProductRepository] Found ${similarProducts.length} similar products',
+      );
+      return similarProducts;
+    } catch (e) {
+      AppLogger.error(
+        '[ProductRepository] Error getting similar products',
+        error: e,
+      );
+      return [];
+    }
+  }
+
   int _nutriscoreRank(String? score) {
     switch ((score ?? '').toLowerCase()) {
       case 'a':

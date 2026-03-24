@@ -26,13 +26,14 @@ class Start extends StatelessWidget {
             child: Text(
               'Xin chào',
               style: TextStyle(
-                fontFamily: 'BBHBartle',
+                fontFamily: 'StoryScript',
                 color: Colors.green,
-                fontSize: 40,
+                fontSize: 50,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
+
           Positioned(
             top: 160,
             left: 30,
@@ -41,7 +42,7 @@ class Start extends StatelessWidget {
               style: TextStyle(
                 fontFamily: 'StoryScript',
                 color: Colors.green,
-                fontSize: 23,
+                fontSize: 20,
               ),
             ),
           ),

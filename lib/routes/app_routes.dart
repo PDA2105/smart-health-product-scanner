@@ -81,7 +81,7 @@ extension Navigation on BuildContext {
       Navigator.of(this).pushNamed(AppRoutes.productDetail, arguments: product);
     void navigateToProductAlternatives(ProductModel product) => Navigator.of(this)
       .pushNamed(AppRoutes.productAlternatives, arguments: product);
-  void navigateToHome() => Navigator.of(this).pushReplacementNamed(AppRoutes.home);
+  void navigateToHome() => Navigator.of(this).pushNamed(AppRoutes.home);
   void navigateToProfile() => Navigator.of(this).pushNamed(AppRoutes.profile);
   void navigateToProfileEdit() => Navigator.of(this).pushNamed(AppRoutes.profileEdit);
   void navigateToScanHistory() => Navigator.of(this).pushNamed(AppRoutes.scanHistory);
