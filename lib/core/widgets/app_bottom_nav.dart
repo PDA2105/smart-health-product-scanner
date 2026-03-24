@@ -63,6 +63,13 @@ class AppBottomNav extends StatelessWidget {
       return;
     }
 
+    // Scan is an action-like destination: keep previous page in stack
+    // so users can go back after scanning.
+    if (target == AppBottomNavItem.scan) {
+      Navigator.of(context).pushNamed(AppRoutes.scan);
+      return;
+    }
+
     String routeName;
     switch (target) {
       case AppBottomNavItem.home:
